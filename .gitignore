@@ -22,6 +22,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# App folder
+# App Folder
 __pycache__/
 env/
+app/config.py
+
+#recommendation app
+.cache
+.ipynb_checkpoints/*
+*__pycache__*
+*.pyc
+recommendation_app/logger.log
+recommendation_app/venv
