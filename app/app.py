@@ -7,7 +7,6 @@ from config import CLIENT_ID, CLIENT_SECRET, SECRET_KEY
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
-
 SPOTIFY_API_BASE_URL = 'https://api.spotify.com'
 API_VERSION = "v1"
 SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, API_VERSION)
@@ -69,7 +68,6 @@ TOP20_SONGS_ENDPOINT = "{}/{}/{}".format(SPOTIFY_API_URL, 'browse', 'new-release
 def top20():
     
     qparams = {'limit': 20}
-
     token = session.get('token')
     auth = 'Bearer '+token
     headers = {'Authorization': auth}
@@ -77,3 +75,18 @@ def top20():
     resp20 = requests.get(TOP20_SONGS_ENDPOINT, params=qparams, headers=headers)
 
     return resp20.json()
+
+GET_PLAYLIST_ENDPOINT = "{}/{}".format(SPOTIFY_API_URL, 'playlists')
+@app.route('/get-playlist')
+def getPlaylist():
+    args = request.args
+    print(args)
+    playlist_id = args.get('id')
+
+    token = session.get('token')
+    auth = 'Bearer '+token
+    headers = {'Authorization': auth}
+
+    resp = requests.get(GET_PLAYLIST_ENDPOINT+'/'+playlist_id, headers=headers)
+
+    return resp.json()
