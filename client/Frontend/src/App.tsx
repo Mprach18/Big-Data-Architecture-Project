@@ -17,17 +17,15 @@ function App() {
 
   // call the backend route API
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/")
-      .then(response => response.json())
-      .then(data => setToken(data.access_token));
+    window.location.href = "http://127.0.0.1:5000/login"
   }, []);
 
   
-  useEffect(() => {
-    fetch("http://127.0.0.1:5000/get-playlist?id=37i9dQZEVXbMDoHDwVN2tF&limit=20")
-      .then(response => response.json())
-      .then(data => setTopTracks(data.items));
-  }, []);
+  // useEffect(() => {
+  //   fetch("http://127.0.0.1:5000/get-playlist?id=37i9dQZEVXbMDoHDwVN2tF&limit=20")
+  //     .then(response => response.json())
+  //     .then(data => setTopTracks(data.items));
+  // }, []);
 
   // Extract track object from each item from the API response
   const trackList = topTracks.map(({track}, index) => {

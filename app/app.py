@@ -48,15 +48,15 @@ def login():
 
 @app.route('/callback')
 def callback():
-    global SESSION_INFO
     # Verify state parameter
+    print(request.args.get('state'), session['state'])
     if request.args.get('state') != session['state']:
         return 'Error: state parameter does not match'
     
     # Exchange code for access token
     code = request.args.get('code')
     auth_header = base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()
-    headers = {'Authorization': f'Basic {auth_header}'}
+    headers = {'Authorization': f'Basic {auth_header}', "Content-Type": "application/x-www-form-urlencoded"}
     data = {
         'grant_type': 'authorization_code',
         'code': code,
@@ -67,9 +67,8 @@ def callback():
     response = response.json()
     response['date'] = datetime.datetime.now()
 
-    SESSION_INFO = response
     # Save access token to session
-    return response
+    return redirect('http://localhost/?' + requests.compat.urlencode(response))
 
 # Make a request to the Spotify API to refresh the access token
 @app.route('/refresh')
@@ -83,47 +82,13 @@ def refresh():
     response = requests.post(SPOTIFY_TOKEN_URL, headers=headers, data=data)
     response = response.json()
     response['date'] = datetime.datetime.now()
-    return response
-
-# def authorize():
-#     auth_header = base64.b64encode((CLIENT_ID + ':' + CLIENT_SECRET).encode('ascii')).decode('ascii')
-#     auth_options = {
-#         'url': 'https://accounts.spotify.com/api/token',
-#         'headers': {
-#             'Authorization': 'Basic ' + auth_header
-#         },
-#         'form': {
-#             'grant_type': 'client_credentials'
-#         },
-#         'json': True
-#     }
-#     now = datetime.datetime.now()
-#     response = requests.post(auth_options['url'], headers=auth_options['headers'], data=auth_options['form'])
-
-#     if response.status_code == 200:
-#         token = response.json()['access_token']
-#         session['token'] = token
-#         response = response.json()
-#         response['date'] = now
-#         return response 
-#     else:
-#         return 'Error: Unable to get access token'
-
-def get_session_info():
-    global SESSION_INFO
-    print(SESSION_INFO['access_token'])
-    if not (SESSION_INFO['access_token'] is not None):
-        print('no session info')
-        token = login()
-        # SESSION_INFO = refresh()
-        print(SESSION_INFO)
-    elif not (SESSION_INFO['date'] + datetime.timedelta(seconds=SESSION_INFO['expires_in']) > datetime.datetime.now()):
-        SESSION_INFO = refresh()
-    return SESSION_INFO
+    return response.json()
 
 @app.route('/')
 def index():
-    return get_session_info()
+    response = login()
+    print(response)
+    return response
 
 SEARCH_ENDPOINT = "{}/{}".format(SPOTIFY_API_URL, 'search')
 @app.route('/search-track')
@@ -150,7 +115,6 @@ def searchSongs():
 TOP20_SONGS_ENDPOINT = "{}/{}/{}".format(SPOTIFY_API_URL, 'browse', 'new-releases')
 @app.route('/top20')
 def top20():
-    
     qparams = {'limit': 20}
     token = get_session_info()['access_token']
     auth = 'Bearer '+ token
