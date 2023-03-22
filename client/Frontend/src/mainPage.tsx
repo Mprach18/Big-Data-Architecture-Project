@@ -8,53 +8,34 @@ import { Container, Form } from "react-bootstrap"
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from "axios";
+import useAccessToken from './hooks/useAccessToken';
 
 function MainPage() {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const {accessToken, isLoading} = useAccessToken()
 
 
     function handleChange(event: { target: { value: SetStateAction<string>; }; }) {
         setSearchTerm(event.target.value) 
         console.log('searchTerm-', searchTerm)
+
         var url = 'http://localhost:5000/search-track'
-
-
-        fetch(`${url}?name=${searchTerm}&search_type=track`,
+ 
+        fetch(`${url}?name=${searchTerm}&search_type=track&access_token=${accessToken}`,
         {
             method: 'GET',
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json'
-            },
-            mode: 'no-cors'
+            }
         }
         )
         .then(response => response.json())
-        .then(data => console.log(data))
+        .then(data => {setSearchResults(data.items)})
         .catch(error => console.log('api error-',error));
 
-        // const config = { 
-        //     headers: {
-        //     'Access-Control-Allow-Origin': '*',
-        //     'Content-Type': 'application/json'
-        //     },
-        //     params: {
-        //         name: searchTerm,
-        //         search_type: 'track'
-        //     } 
-        // }
-        // axios.get(url, config)
-        // .then((response) => {
-        //     const res = response.data
-        //     console.log('res.items ',res.items)
-        //     setSearchResults(res.items)
-        //     //setSearchResults(res)
-        // })
-        // .catch(error => console.error(error));
-                  
       }
 
   return (
@@ -75,7 +56,7 @@ function MainPage() {
                             onChange={handleChange}
                         />
                         <div className="flex-grow-1 my-2" style={{ overflowY: "auto" }}>
-                            <Card border="light" bg="dark">
+                            <Card border="light">
                                 <Card.Body>
                                 <div className="row">
                                     <div className="col-10 d-flex p-2">
