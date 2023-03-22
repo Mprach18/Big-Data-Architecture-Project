@@ -68,7 +68,7 @@ def callback():
     response['date'] = datetime.datetime.now()
 
     # Save access token to session
-    return redirect('http://localhost/?' + requests.compat.urlencode(response))
+    return redirect('http://localhost:3000/?' + requests.compat.urlencode(response))
 
 # Make a request to the Spotify API to refresh the access token
 @app.route('/refresh')
