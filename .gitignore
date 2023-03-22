@@ -25,3 +25,13 @@ yarn-error.log*
 # App Folder
 __pycache__/
 env/
+app/config.py
+app/.flaskenv
+
+#recommendation app
+.cache
+.ipynb_checkpoints/*
+*__pycache__*
+*.pyc
+recommendation_app/logger.log
+recommendation_app/venv

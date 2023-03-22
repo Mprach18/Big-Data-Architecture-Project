@@ -1,0 +1,12 @@
+{% extends "home.html" %}
+{% block results %}
+<div class='results'>
+    <h2 style='color: #ececec'>There you go:</h2>
+        {% for song in songs %}
+        <p class='song' style="font-size: 15pt; font-family: Gotham Rounded 300; color:white;"> 
+            <a  href={{song[0][1]}} target="_blank" style="color:black; margin-bottom: 10%; line-height: 30px;"> {{ song[0][0]}} </a> 
+            <b style="color:black">{{ song[0][2]}}</b>
+        </p>
+        {% endfor %}    
+</div>
+{% endblock %}
