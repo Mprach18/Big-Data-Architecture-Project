@@ -9,6 +9,7 @@ import {
   Route,
   Link
 } from 'react-router-dom';
+import MainPage from './mainPage';
 
 declare global {
   interface Window {
@@ -16,11 +17,20 @@ declare global {
     Spotify: any;
   }
 }
+// import Button from 'react-bootstrap/Button';
+// import Tab from 'react-bootstrap/Tab';
+// import Tabs from 'react-bootstrap/Tabs';
+// import Card from 'react-bootstrap/Card';
+// import { Container, Form } from "react-bootstrap"
+// import Row from 'react-bootstrap/Row';
+// import Col from 'react-bootstrap/Col';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+//import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+
 
 function App() {
   const location = useLocation();
   // Save access_token from spotify
-  const [token, setToken] = useState("");
   const [topTracks, setTopTracks] = useState([{'track': {name: '', artists: [{name: ''}]}}]);
   const [currentTrack, setCurrentTrack] = useState({});
 
@@ -30,7 +40,6 @@ function App() {
     const urlParams = new URLSearchParams(url)
     const QueryParams = Object.fromEntries(urlParams);
     if (QueryParams['access_token']) {
-      setToken(QueryParams['access_token'])
       localStorage.setItem('SESSION_INFO', JSON.stringify(QueryParams));
     }
   }, [location.search]);
@@ -56,6 +65,7 @@ function App() {
     <div className="App">
         <Routes>
               <Route path='/login' element={< Login />}></Route>
+              <Route path='/' element={< MainPage />}></Route>
         </Routes>
 
       {/* <div>

@@ -96,6 +96,7 @@ def searchSongs():
     args = request.args
     name = args.get('name')
     search_type = args.get('search_type')
+    access_token = args.get('access_token')
     if search_type not in ['artist', 'track', 'album', 'playlist']:
         print('invalid type')
         return None
@@ -103,8 +104,7 @@ def searchSongs():
     qparams = {'type': search_type}
     qparams['q'] = name
 
-    token = get_session_info()['access_token']
-    auth = 'Bearer '+ token
+    auth = 'Bearer '+ access_token
     headers = {'Authorization': auth}
 
     resp = requests.get(SEARCH_ENDPOINT, params=qparams, headers=headers)

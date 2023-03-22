@@ -49,3 +49,5 @@ function useAccessToken() {
 
     return {accessToken, isLoading}
 }
+
+export default useAccessToken
