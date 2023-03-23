@@ -18,23 +18,30 @@ function MainPage() {
 
 
     function handleChange(event: { target: { value: SetStateAction<string>; }; }) {
+        console.log('handle change called')
         setSearchTerm(event.target.value) 
         console.log('searchTerm-', searchTerm)
 
         var url = 'http://localhost:5000/search-track'
  
-        fetch(`${url}?name=${searchTerm}&search_type=track&access_token=${accessToken}`,
-        {
-            method: 'GET',
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json'
+        if(searchTerm.length>3){
+            fetch(`${url}?name=${searchTerm}&search_type=track&access_token=${accessToken}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                }
             }
+            )
+            .then(response => response.json())
+            .then(data => {
+                console.log('data-', data)
+                setSearchResults(data.items)
+            })
+            .catch(error => console.log('api error-',error));
         }
-        )
-        .then(response => response.json())
-        .then(data => {setSearchResults(data.items)})
-        .catch(error => console.log('api error-',error));
+        
 
       }
 
