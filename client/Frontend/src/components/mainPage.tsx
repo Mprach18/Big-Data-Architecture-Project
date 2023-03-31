@@ -10,6 +10,7 @@ import Col from 'react-bootstrap/Col';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import useAccessToken from '../hooks/useAccessToken';
 import SpotifyPlayerWrapper from './Player';
+import RecommendationsWrapper from './Recommendations';
 
 function MainPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -110,11 +111,7 @@ function MainPage() {
             </Row>
           </Col>
           <Col className="Recommendations">
-            <Row>
-              <h2>
-                <b>Recommendations</b>
-              </h2>
-            </Row>
+            <RecommendationsWrapper access_token={accessToken} setCurrentTrack={setCurrentTrack} />
           </Col>
         </Row>
       </Container>

@@ -6,6 +6,7 @@ from flask_cors import CORS
 from config import CLIENT_ID, CLIENT_SECRET, SECRET_KEY
 import random
 import string
+import json
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -20,7 +21,7 @@ SPOTIFY_AUTH_URL = 'https://accounts.spotify.com/authorize'
 SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
 REDIRECT_URI = 'http://127.0.0.1:5000/callback'
-SCOPE = 'playlist-modify-private,playlist-modify-public,user-top-read,streaming'
+SCOPE = 'playlist-modify-private,playlist-modify-public,user-top-read,streaming,user-read-email,user-read-private,user-read-playback-state,user-modify-playback-state'
 SHOW_DIALOG = True
 
 SESSION_INFO = {
@@ -71,18 +72,21 @@ def callback():
     return redirect('http://localhost:3000/?' + requests.compat.urlencode(response))
 
 # Make a request to the Spotify API to refresh the access token
-@app.route('/refresh')
+# make it a post request
+@app.route('/refresh', methods=['POST'])
 def refresh():
     auth_header = base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()
     headers = {'Authorization': 'Basic ' + auth_header}
+    if(request.data):
+        refresh_token = json.loads(request.data.decode('utf-8'))['refresh_token']
     data = {
         'grant_type': 'refresh_token',
-        'refresh_token': session['refresh_token']
+        'refresh_token': refresh_token,
     }
     response = requests.post(SPOTIFY_TOKEN_URL, headers=headers, data=data)
     response = response.json()
     response['date'] = datetime.datetime.now()
-    return response.json()
+    return response
 
 @app.route('/')
 def index():
@@ -95,6 +99,7 @@ SEARCH_ENDPOINT = "{}/{}".format(SPOTIFY_API_URL, 'search')
 def searchSongs():
     args = request.args
     name = args.get('name')
+    print(name)
     search_type = args.get('search_type')
     access_token = args.get('access_token')
     if search_type not in ['artist', 'track', 'album', 'playlist']:
@@ -108,35 +113,32 @@ def searchSongs():
     headers = {'Authorization': auth}
 
     resp = requests.get(SEARCH_ENDPOINT, params=qparams, headers=headers)
-
+    print(resp)
     return resp.json()
 
 
-TOP20_SONGS_ENDPOINT = "{}/{}/{}".format(SPOTIFY_API_URL, 'browse', 'new-releases')
-@app.route('/top20')
-def top20():
-    qparams = {'limit': 20}
-    token = get_session_info()['access_token']
-    auth = 'Bearer '+ token
-    headers = {'Authorization': auth}
+# TOP20_SONGS_ENDPOINT = "{}/{}/{}".format(SPOTIFY_API_URL, 'browse', 'new-releases')
+# @app.route('/top20')
+# def top20():
+#     qparams = {'limit': 20}
+#     token = get_session_info()['access_token']
+#     auth = 'Bearer '+ token
+#     headers = {'Authorization': auth}
 
-    resp20 = requests.get(TOP20_SONGS_ENDPOINT, params=qparams, headers=headers)
-    return resp20.json()
+#     resp20 = requests.get(TOP20_SONGS_ENDPOINT, params=qparams, headers=headers)
+#     return resp20.json()
 
 GET_PLAYLIST_ENDPOINT = "{}/{}".format(SPOTIFY_API_URL, 'playlists')
-@app.route('/get-playlist')
+@app.route('/get-playlist', methods=['POST'])
 def getPlaylist():
-    args = request.args
-    print(args)
-    playlist_id = args.get('id')
-    playlist_limit = args.get('limit')
-
-    token = session['access_token']
-    auth = 'Bearer '+token
+    request_body = json.loads(request.data.decode('utf-8'))
+    playlist_id = request_body['playlist_id']
+    playlist_limit = str(request_body['playlist_limit'])
+    access_token = request_body['access_token']
+    auth = 'Bearer '+access_token
     headers = {'Authorization': auth}
 
     endpoint = GET_PLAYLIST_ENDPOINT+'/'+playlist_id + '/tracks'
-
     if playlist_limit is not None:
         endpoint += '?limit='+playlist_limit
         
