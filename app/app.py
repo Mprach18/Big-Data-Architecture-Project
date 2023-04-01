@@ -3,9 +3,13 @@ from flask import Flask, request, session, redirect
 import requests
 import base64
 from flask_cors import CORS
-from config import CLIENT_ID, CLIENT_SECRET, SECRET_KEY
+#from config import CLIENT_ID, CLIENT_SECRET, SECRET_KEY
 import random
 import string
+
+CLIENT_ID = '6dfeb3b208d644cdb26620d00611eacd'
+CLIENT_SECRET = 'd1a321a4aa1f4d0e84b631581c97356b'
+SECRET_KEY = 'secret'
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -71,8 +75,10 @@ def callback():
     return redirect('http://localhost:3000/?' + requests.compat.urlencode(response))
 
 # Make a request to the Spotify API to refresh the access token
-@app.route('/refresh')
+@app.route('/refresh', methods=['POST', 'GET'])
 def refresh():
+    body = request.form
+    refresh_token = body['refresh_token']
     auth_header = base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()
     headers = {'Authorization': 'Basic ' + auth_header}
     data = {
