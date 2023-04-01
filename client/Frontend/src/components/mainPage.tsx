@@ -29,6 +29,7 @@ interface playlistItem {
 function MainPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const [playlist, setPlaylist] = useState<playlistItem[]>([]);
   const [currentTrack, setCurrentTrack] = useState({
     album: {
@@ -66,11 +67,19 @@ function MainPage() {
         .then((data) => {
           console.log('data-', data);
           setSearchResults(data.tracks.items);
-          setCurrentTrack(data.tracks.items[0]);
+          // setCurrentTrack(data.tracks.items[0]);
         })
         .catch((error) => console.log('api error-', error));
     }
   }
+
+  const handleFocus = () => {
+    setIsSearchActive(true);
+  };
+
+  const handleBlur = () => {
+    setIsSearchActive(false);
+  };
 
   const handleAddToPlaylist = (item: playlistItem) => {
     setPlaylist([...playlist, item]);
@@ -99,6 +108,8 @@ function MainPage() {
                     placeholder="Search Songs"
                     value={searchTerm}
                     onChange={handleChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                   />
                   <div style={{ zIndex: 2 }}>
                     {searchResults && (
