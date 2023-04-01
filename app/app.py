@@ -8,6 +8,10 @@ import random
 import string
 import json
 
+# CLIENT_ID = '6dfeb3b208d644cdb26620d00611eacd'
+# CLIENT_SECRET = 'd1a321a4aa1f4d0e84b631581c97356b'
+# SECRET_KEY = 'secret'
+
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 app.secret_key = SECRET_KEY
@@ -75,6 +79,8 @@ def callback():
 # make it a post request
 @app.route('/refresh', methods=['POST'])
 def refresh():
+    body = request.form
+    refresh_token = body['refresh_token']
     auth_header = base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()
     headers = {'Authorization': 'Basic ' + auth_header}
     if(request.data):
@@ -113,7 +119,6 @@ def searchSongs():
     headers = {'Authorization': auth}
 
     resp = requests.get(SEARCH_ENDPOINT, params=qparams, headers=headers)
-    print(resp)
     return resp.json()
 
 
