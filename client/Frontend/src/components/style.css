@@ -1,0 +1,16 @@
+.main {
+  height: 100vh;
+  max-width: 100% !important;
+}
+
+.spotify-player {
+  position: sticky;
+  bottom: 0px;
+}
+
+.spotify-player-default {
+  position: sticky;
+  bottom: 0px;
+  padding: 30px;
+  border: 1px solid black;
+}
