@@ -14,10 +14,8 @@ function useAccessToken() {
   useEffect(() => {
     console.log('useAccessToken useEffect');
     const sessionJson = localStorage.getItem('SESSION_INFO');
-    console.log('sessionJson-', sessionJson);
     const sessionInfo: TokenData = JSON.parse(sessionJson ? sessionJson : JSON.stringify(''));
     if (sessionInfo) {
-      console.log('sessionInfo-', sessionInfo);
       const now = new Date().getTime();
       const creationTime = new Date(sessionInfo.date).getTime();
       const expiresIn = sessionInfo.expires_in;
@@ -29,8 +27,10 @@ function useAccessToken() {
         })
           .then((response: Response) => response.json())
           .then((data: TokenData) => {
+            const res = data;
+            res['refresh_token'] = refresh_token;
             setAccessToken(data.access_token);
-            localStorage.setItem('SESSION_INFO', JSON.stringify(data));
+            localStorage.setItem('SESSION_INFO', JSON.stringify(res));
           })
           .catch((err) => {
             console.error('Error refreshing token:', err);
