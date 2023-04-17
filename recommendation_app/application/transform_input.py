@@ -1,8 +1,6 @@
-import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from textblob import TextBlob
-from IPython import get_ipython
 
 def getSubjectivity(text):
     '''
