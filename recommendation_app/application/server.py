@@ -20,13 +20,13 @@ cluster_name = 'my-second-cluster'
 job_id = 'test-job'
 
 # Set the main Python file for your job
-main_python_file_uri = 'gs://nsr_data/notebooks/jupyter/pipeline.py'
+main_python_file_uri = 'gs://nsr_data/notebooks/jupyter/Shivam_recommendation-map.py'
 
 # Set any additional Python files your job needs
 # python_file_uris = ['gs://my-bucket/my-dependency.egg']
 
 # Set any command line arguments your job needs
-args = [ 'abc123']
+# args = [ 'abc123']
 
 # Create a PySpark job configuration
 job = {
@@ -34,9 +34,9 @@ job = {
         'cluster_name': cluster_name
     },
     'pyspark_job': {
-        'main_python_file_uri': main_python_file_uri,
+        'main_python_file_uri': main_python_file_uri
         # 'python_file_uris': python_file_uris,
-        'args': args
+        # 'args': args
     }
 }
 
@@ -45,3 +45,4 @@ operation = client.submit_job_as_operation(project_id=project_id, region=region,
 
 # Wait for the job to complete
 response = operation.result()
+print(response)
