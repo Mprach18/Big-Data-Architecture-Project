@@ -1,25 +1,25 @@
-import { useState, useEffect } from 'react';
-import SpotifyPlayer from 'react-spotify-web-playback';
+import { useState, useEffect } from 'react'
+import SpotifyPlayer from 'react-spotify-web-playback'
 
 function SpotifyPlayerWrapper({
   token,
   track
 }: {
-  token: string;
+  token: string
   track: {
     album: {
       images: {
-        url: string;
-      }[];
-    };
-    name: string;
+        url: string
+      }[]
+    }
+    name: string
     artists: {
-      name: string;
-    }[];
-    uri: string;
-  };
+      name: string
+    }[]
+    uri: string
+  }
 }) {
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(false)
 
   /*
     useEffect(() => {
@@ -127,12 +127,12 @@ function SpotifyPlayerWrapper({
       );
   */
 
-  if (!track.uri) return <div className="spotify-player-default">Select a Song to Play</div>;
+  if (!track.uri) return <div className="spotify-player-default">Select a Song to Play</div>
   return (
     <div className="spotify-player">
       <SpotifyPlayer token={token} uris={track ? [track.uri] : []} play={isPaused} />
     </div>
-  );
+  )
 }
 
-export default SpotifyPlayerWrapper;
+export default SpotifyPlayerWrapper

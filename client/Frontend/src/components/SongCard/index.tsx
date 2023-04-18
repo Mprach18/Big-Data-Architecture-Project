@@ -1,14 +1,14 @@
-import React from 'react';
-import { Card, Button } from 'react-bootstrap';
-import './style.css';
+import React from 'react'
+import { Card, Button } from 'react-bootstrap'
+import './style.css'
 
 interface SongCardProps {
   song: {
-    name: string;
-    artists: { name: string }[];
-    album: { images: { url: string }[] };
-  };
-  setCurrentTrack: (track: any) => void;
+    name: string
+    artists: { name: string }[]
+    album: { images: { url: string }[] }
+  }
+  setCurrentTrack: (track: any) => void
 }
 
 function SongCard({
@@ -31,7 +31,7 @@ function SongCard({
         <img className="play-button-icon" src={'./playIcon.png'} alt="play button" />
       </Button>
     </Card>
-  );
+  )
 }
 
-export default SongCard;
+export default SongCard

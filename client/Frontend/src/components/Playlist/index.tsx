@@ -1,25 +1,25 @@
-import { ListGroup, Button } from 'react-bootstrap';
+import { ListGroup, Button } from 'react-bootstrap'
 
 interface Item {
-  name: string;
-  id: number;
+  name: string
+  id: number
   album: {
     images: {
-      url: string;
-    }[];
-  };
+      url: string
+    }[]
+  }
   artists: {
-    name: string;
-    href: string;
-  }[];
+    name: string
+    href: string
+  }[]
 }
 
 const ItemList = ({
   onChildData,
   items
 }: {
-  onChildData: (childData: Item) => void;
-  items: Item[];
+  onChildData: (childData: Item) => void
+  items: Item[]
 }) => {
   return (
     <ListGroup>
@@ -53,7 +53,7 @@ const ItemList = ({
         </ListGroup.Item>
       ))}
     </ListGroup>
-  );
-};
+  )
+}
 
-export default ItemList;
+export default ItemList
