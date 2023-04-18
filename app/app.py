@@ -1,15 +1,12 @@
 import datetime
-from flask import Flask, request, session, redirect
+from flask import Flask, request, session, redirect, jsonify
 import requests
 import base64
 from flask_cors import CORS
 from config import CLIENT_ID, CLIENT_SECRET, SECRET_KEY
 import random
 import string
-
-# CLIENT_ID = '6dfeb3b208d644cdb26620d00611eacd'
-# CLIENT_SECRET = 'd1a321a4aa1f4d0e84b631581c97356b'
-# SECRET_KEY = 'secret'
+import json
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -24,7 +21,7 @@ SPOTIFY_AUTH_URL = 'https://accounts.spotify.com/authorize'
 SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
 REDIRECT_URI = 'http://127.0.0.1:5000/callback'
-SCOPE = 'playlist-modify-private,playlist-modify-public,user-top-read,streaming'
+SCOPE = 'playlist-modify-private,playlist-modify-public,user-top-read,streaming,user-read-email,user-read-private,user-read-playback-state,user-modify-playback-state'
 SHOW_DIALOG = True
 
 SESSION_INFO = {
@@ -75,20 +72,23 @@ def callback():
     return redirect('http://localhost:3000/?' + requests.compat.urlencode(response))
 
 # Make a request to the Spotify API to refresh the access token
-@app.route('/refresh', methods=['POST', 'GET'])
+# make it a post request
+@app.route('/refresh', methods=['POST'])
 def refresh():
     body = request.form
     refresh_token = body['refresh_token']
     auth_header = base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()
     headers = {'Authorization': 'Basic ' + auth_header}
+    if(request.data):
+        refresh_token = json.loads(request.data.decode('utf-8'))['refresh_token']
     data = {
         'grant_type': 'refresh_token',
-        'refresh_token': session['refresh_token']
+        'refresh_token': refresh_token,
     }
     response = requests.post(SPOTIFY_TOKEN_URL, headers=headers, data=data)
     response = response.json()
     response['date'] = datetime.datetime.now()
-    return response.json()
+    return response
 
 @app.route('/')
 def index():
@@ -101,6 +101,7 @@ SEARCH_ENDPOINT = "{}/{}".format(SPOTIFY_API_URL, 'search')
 def searchSongs():
     args = request.args
     name = args.get('name')
+    print(name)
     search_type = args.get('search_type')
     access_token = args.get('access_token')
     if search_type not in ['artist', 'track', 'album', 'playlist']:
@@ -116,35 +117,46 @@ def searchSongs():
     resp = requests.get(SEARCH_ENDPOINT, params=qparams, headers=headers)
     return resp.json()
 
-
-TOP20_SONGS_ENDPOINT = "{}/{}/{}".format(SPOTIFY_API_URL, 'browse', 'new-releases')
-@app.route('/top20')
-def top20():
-    qparams = {'limit': 20}
-    token = get_session_info()['access_token']
-    auth = 'Bearer '+ token
-    headers = {'Authorization': auth}
-
-    resp20 = requests.get(TOP20_SONGS_ENDPOINT, params=qparams, headers=headers)
-    return resp20.json()
-
 GET_PLAYLIST_ENDPOINT = "{}/{}".format(SPOTIFY_API_URL, 'playlists')
-@app.route('/get-playlist')
+@app.route('/get-playlist', methods=['POST'])
 def getPlaylist():
-    args = request.args
-    print(args)
-    playlist_id = args.get('id')
-    playlist_limit = args.get('limit')
-
-    token = session['access_token']
-    auth = 'Bearer '+token
+    request_body = json.loads(request.data.decode('utf-8'))
+    playlist_id = request_body['playlist_id']
+    playlist_limit = str(request_body['playlist_limit'])
+    access_token = request_body['access_token']
+    auth = 'Bearer '+access_token
     headers = {'Authorization': auth}
 
     endpoint = GET_PLAYLIST_ENDPOINT+'/'+playlist_id + '/tracks'
-
     if playlist_limit is not None:
         endpoint += '?limit='+playlist_limit
         
     resp = requests.get(endpoint, headers=headers)
     return resp.json()
+
+
+
+@app.route('/fetch-track-details', methods=['POST'])
+def fetchTrackDetails():
+    request_body = json.loads(request.data.decode('utf-8'))
+    result_playlist = []
+    for item in request_body:
+        track_id = item['id']
+        track_name = item['name']
+        track_artists = [artist['name'] for artist in item['artists']]
+        print('track_artist', track_artists[0])
+        track_first_artist = item['artists'][0]['name']
+
+    
+        track = {
+            'id': track_id,
+            'name': track_name,
+            'artist': track_artists,
+            'first_artist': track_first_artist
+        }
+        print('track',track)
+        result_playlist.append(track)
+        
+
+    return jsonify(result_playlist)
 
