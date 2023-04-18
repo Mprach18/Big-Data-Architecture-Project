@@ -137,7 +137,10 @@ function MainPage() {
     const url = 'http://127.0.0.1:5000/fetch-track-details'
     fetch(url, {
       method: 'POST',
-      body: JSON.stringify(playlist)
+      body: JSON.stringify({
+        playlist: playlist,
+        access_token: accessToken
+      })
     })
       .then((response) => response.json())
       .catch((error) => console.log('api error-', error))
