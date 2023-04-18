@@ -1,4 +1,4 @@
-import { MouseEventHandler, useState } from 'react'
+import { useState } from 'react'
 import './style.css'
 import Button from 'react-bootstrap/Button'
 import Tab from 'react-bootstrap/Tab'
@@ -12,7 +12,6 @@ import useAccessToken from '../hooks/useAccessToken'
 import SpotifyPlayerWrapper from './Player'
 import RecommendationsWrapper from './Recommendations'
 import ItemList from './Playlist'
-import SongCard from './SongCard'
 
 interface playlistItem {
   name: string
