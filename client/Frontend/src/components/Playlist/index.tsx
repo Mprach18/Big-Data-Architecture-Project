@@ -1,26 +1,26 @@
-import { useState } from 'react';
-import { ListGroup, Button } from 'react-bootstrap';
+import { useState } from 'react'
+import { ListGroup, Button } from 'react-bootstrap'
 
 interface Item {
-  name: string;
-  id: number;
+  name: string
+  id: number
   album: {
     images: {
-      url: string;
-    }[];
-  };
+      url: string
+    }[]
+  }
   artists: {
-    name: string;
-    href: string;
-  }[];
+    name: string
+    href: string
+  }[]
 }
 
 const ItemList = ({
   onChildData,
   items
 }: {
-  onChildData: (childData: Item) => void;
-  items: Item[];
+  onChildData: (childData: Item) => void
+  items: Item[]
 }) => {
   return (
     <ListGroup>
@@ -28,18 +28,18 @@ const ItemList = ({
         <SingleListItem key={item.id} onChildData={onChildData} item={item} />
       ))}
     </ListGroup>
-  );
-};
+  )
+}
 
 const SingleListItem = ({
   item,
   onChildData
 }: {
-  item: Item;
-  onChildData: (item: Item) => void;
-  [key: string]: unknown;
+  item: Item
+  onChildData: (item: Item) => void
+  [key: string]: unknown
 }) => {
-  const [isAdded, setIsAdded] = useState(false);
+  const [isAdded, setIsAdded] = useState(false)
 
   return (
     <ListGroup.Item className="d-flex p-2">
@@ -61,14 +61,14 @@ const SingleListItem = ({
               id: item.id,
               album: item.album,
               artists: item.artists
-            });
-            setIsAdded(!isAdded);
+            })
+            setIsAdded(!isAdded)
           }}>
           {isAdded ? '✔' : '+'}
         </Button>
       </div>
     </ListGroup.Item>
-  );
-};
+  )
+}
 
-export default ItemList;
+export default ItemList
