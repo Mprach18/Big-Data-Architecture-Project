@@ -8,7 +8,6 @@ import random
 import string
 import json
 
-
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 app.secret_key = SECRET_KEY
@@ -117,18 +116,6 @@ def searchSongs():
 
     resp = requests.get(SEARCH_ENDPOINT, params=qparams, headers=headers)
     return resp.json()
-
-
-# TOP20_SONGS_ENDPOINT = "{}/{}/{}".format(SPOTIFY_API_URL, 'browse', 'new-releases')
-# @app.route('/top20')
-# def top20():
-#     qparams = {'limit': 20}
-#     token = get_session_info()['access_token']
-#     auth = 'Bearer '+ token
-#     headers = {'Authorization': auth}
-
-#     resp20 = requests.get(TOP20_SONGS_ENDPOINT, params=qparams, headers=headers)
-#     return resp20.json()
 
 GET_PLAYLIST_ENDPOINT = "{}/{}".format(SPOTIFY_API_URL, 'playlists')
 @app.route('/get-playlist', methods=['POST'])
