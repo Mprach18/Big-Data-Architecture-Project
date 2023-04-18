@@ -1,5 +1,5 @@
 import datetime
-from flask import Flask, request, session, redirect
+from flask import Flask, request, session, redirect, jsonify
 import requests
 import base64
 from flask_cors import CORS
@@ -7,6 +7,7 @@ from config import CLIENT_ID, CLIENT_SECRET, SECRET_KEY
 import random
 import string
 import json
+
 
 # CLIENT_ID = '6dfeb3b208d644cdb26620d00611eacd'
 # CLIENT_SECRET = 'd1a321a4aa1f4d0e84b631581c97356b'
@@ -149,4 +150,30 @@ def getPlaylist():
         
     resp = requests.get(endpoint, headers=headers)
     return resp.json()
+
+
+
+@app.route('/fetch-track-details', methods=['POST'])
+def fetchTrackDetails():
+    request_body = json.loads(request.data.decode('utf-8'))
+    result_playlist = []
+    for item in request_body:
+        track_id = item['id']
+        track_name = item['name']
+        track_artists = [artist['name'] for artist in item['artists']]
+        print('track_artist', track_artists[0])
+        track_first_artist = item['artists'][0]['name']
+
+    
+        track = {
+            'id': track_id,
+            'name': track_name,
+            'artist': track_artists,
+            'first_artist': track_first_artist
+        }
+        print('track',track)
+        result_playlist.append(track)
+        
+
+    return jsonify(result_playlist)
 
