@@ -139,8 +139,10 @@ def getPlaylist():
 @app.route('/fetch-track-details', methods=['POST'])
 def fetchTrackDetails():
     request_body = json.loads(request.data.decode('utf-8'))
+    playlist = request_body['playlist']
+    uid = request_body['uid']
     result_playlist = []
-    for item in request_body:
+    for item in playlist:
         track_id = item['id']
         track_name = item['name']
         track_artists = [artist['name'] for artist in item['artists']]
