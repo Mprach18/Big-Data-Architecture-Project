@@ -83,6 +83,10 @@ function MainPage() {
   };
 
   const handleAddToPlaylist = (item: playlistItem) => {
+    // If item is already in playlist, don't add it again
+    if (playlist.some((playlistItem) => playlistItem.id === item.id)) {
+      return;
+    }
     setPlaylist([...playlist, item]);
   };
 
@@ -109,49 +113,57 @@ function MainPage() {
                     placeholder="Search Songs"
                     value={searchTerm}
                     onChange={handleChange}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
+                    // onFocus={handleFocus}
+                    // onBlur={handleBlur}
                   />
-                  <div style={{ zIndex: 2 }}>
-                    {searchResults && (
-                      <ItemList onChildData={handleAddToPlaylist} items={searchResults} />
-                    )}
-                  </div>
+                  {searchTerm && (
+                    <>
+                      <div style={{ zIndex: 2 }}>
+                        {searchResults && (
+                          <ItemList onChildData={handleAddToPlaylist} items={searchResults} />
+                        )}
+                      </div>
+                    </>
+                  )}
 
-                  {playlist.length > 0 && (
-                    <div className="flex-grow-1 my-2" style={{ overflowY: 'auto' }}>
-                      Playlist
-                      <ListGroup>
-                        {playlist.map((playlistItem, index) => (
-                          <ListGroup.Item key={playlistItem.id} className="d-flex p-2">
-                            <div className="col-2">
-                              <img
-                                width="50px"
-                                height="50px"
-                                src={playlistItem.album.images[0].url}
-                                alt="Song cover"
-                              />
-                            </div>
-                            <div className="col-8" style={{ textAlign: 'left' }}>
-                              <div className="row">{playlistItem.name}</div>
-                              <div className="row">
-                                Artists:{' '}
-                                {playlistItem.artists.map((artist) => artist.name).join(', ')}
-                              </div>
-                            </div>
-                            <div className="col-2">
-                              <Button
-                                variant="danger"
-                                className="rounded-circle"
-                                size="lg"
-                                onClick={() => handleRemoveFromPlaylist(index)}>
-                                -
-                              </Button>
-                            </div>
-                          </ListGroup.Item>
-                        ))}
-                      </ListGroup>
-                    </div>
+                  {!searchTerm && (
+                    <>
+                      {playlist.length > 0 && (
+                        <div className="flex-grow-1 my-2" style={{ overflowY: 'auto' }}>
+                          Playlist
+                          <ListGroup>
+                            {playlist.map((playlistItem, index) => (
+                              <ListGroup.Item key={playlistItem.id} className="d-flex p-2">
+                                <div className="col-2">
+                                  <img
+                                    width="50px"
+                                    height="50px"
+                                    src={playlistItem.album.images[0].url}
+                                    alt="Song cover"
+                                  />
+                                </div>
+                                <div className="col-8" style={{ textAlign: 'left' }}>
+                                  <div className="row">{playlistItem.name}</div>
+                                  <div className="row">
+                                    Artists:{' '}
+                                    {playlistItem.artists.map((artist) => artist.name).join(', ')}
+                                  </div>
+                                </div>
+                                <div className="col-2">
+                                  <Button
+                                    variant="danger"
+                                    className="rounded-circle"
+                                    size="lg"
+                                    onClick={() => handleRemoveFromPlaylist(index)}>
+                                    -
+                                  </Button>
+                                </div>
+                              </ListGroup.Item>
+                            ))}
+                          </ListGroup>
+                        </div>
+                      )}
+                    </>
                   )}
                 </Tab>
                 <Tab eventKey="link" title="Playlist Link">
