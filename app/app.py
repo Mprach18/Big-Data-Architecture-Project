@@ -7,7 +7,8 @@ from config import CLIENT_ID, CLIENT_SECRET, SECRET_KEY
 import random
 import string
 import json
-
+import pandas as pd
+from transform_input import *
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -152,24 +153,79 @@ def getPlaylist():
 @app.route('/fetch-track-details', methods=['POST'])
 def fetchTrackDetails():
     request_body = json.loads(request.data.decode('utf-8'))
+    
+    job_response = []
+        
+    features = get_audio_features(request_body)
+    #print('result: ',features)
+    
+    return job_response
+
+def get_audio_features(request_body):
+    
     result_playlist = []
-    for item in request_body:
+    playlist_audio_features = []
+    access_token = request_body['access_token']
+    
+    auth = 'Bearer '+ access_token
+    headers = {'Authorization': auth}
+    
+    for item in request_body['playlist']:
         track_id = item['id']
         track_name = item['name']
         track_artists = [artist['name'] for artist in item['artists']]
         print('track_artist', track_artists[0])
         track_first_artist = item['artists'][0]['name']
 
-    
         track = {
             'id': track_id,
             'name': track_name,
-            'artist': track_artists,
+            'all_artists': track_artists,
             'first_artist': track_first_artist
         }
         print('track',track)
         result_playlist.append(track)
         
-
-    return jsonify(result_playlist)
-
+        features = requests.get(f'https://api.spotify.com/v1/audio-features/{track_id}', headers=headers)
+        features = features.json()
+        
+        track_audio_features = {
+            'id' : track['id'],
+            'title' : track['name'],
+            'first_artist' : track['first_artist'],
+            'all_artists' : track['all_artists'],
+            'danceability' : features['danceability'],
+            'energy' : features['energy'],
+            'key' : features['key'],
+            'loudness' : features['loudness'],
+            'mode' : features['mode'],
+            'acousticness' : features['acousticness'],
+            'instrumentalness' : features['instrumentalness'],
+            'liveness' : features['liveness'],
+            'valence' : features['valence'],
+            'tempo' : features['tempo'],
+            'duration_ms' : features['duration_ms'],
+            'time_signature' : features['time_signature'],
+            'speechiness': features['speechiness']
+        }
+        
+        print('track_audio_features: ',track_audio_features)
+        
+        playlist_audio_features.append(track_audio_features)
+        
+    column_features = ['id', 'title', 'first_artist', 'all_artists', 'danceability', 'energy', 'key', 'loudness', 'mode', 'acousticness', 
+                       'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms', 'time_signature','speechiness']
+    
+    rows = [[track['id'], track['title'], track['first_artist'], track['all_artists'], track['danceability'], track['energy'], track['key'],
+            track['loudness'], track['mode'], track['acousticness'], track['instrumentalness'], track['liveness'], track['valence'], track['tempo'],
+            track['duration_ms'], track['time_signature'], track['speechiness'] ] for track in playlist_audio_features]
+    
+    features_df = pd.DataFrame(rows, columns=column_features)
+    
+    print('features_df: \n\n',features_df)
+    
+    transformed_input = transform_input_features(features_df)
+    print('transformed_input: \n\n',transformed_input)
+    
+    return features
+    
