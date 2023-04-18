@@ -227,5 +227,5 @@ def get_audio_features(request_body):
     transformed_input = transform_input_features(features_df)
     print('transformed_input: \n\n',transformed_input)
     
-    return features
+    return transformed_input
     
