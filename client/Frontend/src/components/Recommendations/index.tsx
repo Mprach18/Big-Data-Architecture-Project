@@ -24,7 +24,7 @@ function RecommendationsWrapper({ access_token, setCurrentTrack }: Recommendatio
       method: 'POST',
       body: JSON.stringify({
         playlist_id: TOP_SONGS_GLOBAL_PLAYLIST_ID,
-        playlist_limit: 8,
+        playlist_limit: 10,
         access_token
       })
     })
