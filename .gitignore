@@ -2,7 +2,7 @@
 
 # dependencies
 /client/Frontend/node_modules
-\client\Frontend\package-lock.json
+/client/Frontend/package-lock.json
 /.pnp
 .pnp.js
 
