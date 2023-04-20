@@ -49,7 +49,3 @@ job = {
 
 # Submit the job to Dataproc
 operation = client.submit_job_as_operation(project_id=project_id, region=region, job=job)
-
-# Wait for the job to complete
-response = operation.result()
-print(response)

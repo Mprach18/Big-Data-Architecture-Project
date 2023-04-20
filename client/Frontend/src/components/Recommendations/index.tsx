@@ -43,7 +43,7 @@ function RecommendationsWrapper({ access_token, setCurrentTrack }: Recommendatio
     <Row>
       <Row>
         <h2>
-          <b>{title}</b>
+          <b className="text-white">{title}</b>
         </h2>
       </Row>
       <Row>
