@@ -3,7 +3,6 @@ import './style.css'
 import Button from 'react-bootstrap/Button'
 import Tab from 'react-bootstrap/Tab'
 import Tabs from 'react-bootstrap/Tabs'
-import Card from 'react-bootstrap/Card'
 import { Container, Form, ListGroup } from 'react-bootstrap'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -13,6 +12,7 @@ import SpotifyPlayerWrapper from './Player'
 import RecommendationsWrapper from './Recommendations'
 import ItemList from './Playlist'
 import * as CryptoJS from 'crypto-js'
+import Dropdown from './Dropdown'
 
 interface playlistItem {
   name: string
@@ -31,10 +31,23 @@ interface playlistItem {
 function MainPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [playlistSearchTerm, setPlaylistSearchTerm] = useState('')
+  const [selectedGenre, setSelectedGenre] = useState('')
   const [searchResults, setSearchResults] = useState([])
-  const [isSearchActive, setIsSearchActive] = useState(false)
   const [playlist, setPlaylist] = useState<playlistItem[]>([])
   const [playlistLinkResults, setPlayistLinkResults] = useState([])
+  const [noOfRecommendations, setNoOfRecommendations] = useState(5)
+  const genres = [
+    'Pop',
+    'Rock',
+    'Hip-hop',
+    'Jazz',
+    'Classical',
+    'Country',
+    'Blues',
+    'Metal',
+    'Orchestra'
+  ]
+  const noOfRecommendationsOptions = [5, 10, 20, 30, 40]
   const [currentTrack, setCurrentTrack] = useState({
     album: {
       images: [
@@ -111,12 +124,13 @@ function MainPage() {
     }
   }
 
-  const handleFocus = () => {
-    setIsSearchActive(true)
+  const handleGenreSelectOption = (option: string) => {
+    console.log('option-', option)
+    setSelectedGenre(option)
   }
 
-  const handleBlur = () => {
-    setIsSearchActive(false)
+  const handleNoOfRecommendationsOption = (option: number) => {
+    setNoOfRecommendations(option)
   }
 
   const handleAddToPlaylist = (item: playlistItem) => {
@@ -150,7 +164,9 @@ function MainPage() {
     const data = {
       playlist: playlist,
       uid: findHash(playlist),
-      access_token: accessToken
+      access_token: accessToken,
+      genre: selectedGenre,
+      no_of_recommendations: noOfRecommendations
     }
     console.log('data-', data)
     fetch(url, {
@@ -184,7 +200,7 @@ function MainPage() {
                     </div>
                     <div className="col-lg-2">
                       <Button
-                        variant="primary"
+                        variant="secondary"
                         size="lg"
                         className="pr-1"
                         onClick={() => setSearchTerm('')}>
@@ -206,44 +222,66 @@ function MainPage() {
                   {!searchTerm && (
                     <>
                       {playlist.length > 0 && (
-                        <div
-                          className="flex-grow-1 my-2 bg-black text-white"
-                          style={{ overflowY: 'auto' }}>
-                          Playlist
-                          <ListGroup>
-                            {playlist.map((playlistItem, index) => (
-                              <ListGroup.Item
-                                key={playlistItem.id}
-                                className="d-flex p-2 bg-dark text-white mb-2">
-                                <div className="col-2">
-                                  <img
-                                    width="50px"
-                                    height="50px"
-                                    src={playlistItem.album.images[0].url}
-                                    alt="Song cover"
-                                  />
-                                </div>
-                                <div className="col-8" style={{ textAlign: 'left' }}>
-                                  <div className="row">{playlistItem.name}</div>
-                                  <div className="row">
-                                    Artists:{' '}
-                                    {playlistItem.artists.map((artist) => artist.name).join(', ')}
+                        <>
+                          <div
+                            className="flex-grow-1 my-2 bg-black text-white"
+                            style={{ overflowY: 'auto' }}>
+                            Playlist
+                            <ListGroup>
+                              {playlist.map((playlistItem, index) => (
+                                <ListGroup.Item
+                                  key={playlistItem.id}
+                                  className="d-flex p-2 bg-dark text-white mb-2">
+                                  <div className="col-2">
+                                    <img
+                                      width="50px"
+                                      height="50px"
+                                      src={playlistItem.album.images[0].url}
+                                      alt="Song cover"
+                                    />
                                   </div>
-                                </div>
-                                <div className="col-2">
-                                  <Button
-                                    variant="danger"
-                                    className="rounded-circle"
-                                    size="lg"
-                                    onClick={() => handleRemoveFromPlaylist(index)}>
-                                    -
-                                  </Button>
-                                </div>
-                              </ListGroup.Item>
-                            ))}
-                          </ListGroup>
-                          <Button onClick={sendData}>Submit</Button>
-                        </div>
+                                  <div className="col-8" style={{ textAlign: 'left' }}>
+                                    <div className="row">{playlistItem.name}</div>
+                                    <div className="row">
+                                      Artists:{' '}
+                                      {playlistItem.artists.map((artist) => artist.name).join(', ')}
+                                    </div>
+                                  </div>
+                                  <div className="col-2">
+                                    <Button
+                                      variant="secondary"
+                                      className="rounded-circle"
+                                      size="lg"
+                                      onClick={() => handleRemoveFromPlaylist(index)}>
+                                      -
+                                    </Button>
+                                  </div>
+                                </ListGroup.Item>
+                              ))}
+                            </ListGroup>
+                          </div>
+                          <Row>
+                            <Col className="text-start">
+                              <Dropdown
+                                title="Genre"
+                                items={genres}
+                                handleSelectOption={handleGenreSelectOption}
+                              />
+                            </Col>
+                            <Col className="text-start">
+                              <Dropdown
+                                title="No. of Recommendations"
+                                items={noOfRecommendationsOptions}
+                                handleSelectOption={handleNoOfRecommendationsOption}
+                              />
+                            </Col>
+                            <Col className="text-end">
+                              <Button variant="secondary" size="lg" onClick={sendData}>
+                                Recommend
+                              </Button>
+                            </Col>
+                          </Row>
+                        </>
                       )}
                     </>
                   )}
@@ -297,7 +335,7 @@ function MainPage() {
                                 </div>
                                 <div className="col-2">
                                   <Button
-                                    variant="danger"
+                                    variant="secondary"
                                     className="rounded-circle"
                                     size="lg"
                                     onClick={() => handleRemoveFromPlaylist(index)}>
