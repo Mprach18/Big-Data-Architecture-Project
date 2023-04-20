@@ -42,11 +42,11 @@ const SingleListItem = ({
   const [isAdded, setIsAdded] = useState(false)
 
   return (
-    <ListGroup.Item className="d-flex p-2">
+    <ListGroup.Item className="d-flex bg-dark">
       <div className="col-2">
         <img width="50px" height="50px" src={item.album.images[0].url} alt="Song cover" />
       </div>
-      <div className="col-8" style={{ textAlign: 'left' }}>
+      <div className="col-8 text-white font-weight-bold" style={{ textAlign: 'left' }}>
         <div className="row">{item.name}</div>
         <div className="row">Artists: {item.artists.map((artist) => artist.name).join(', ')}</div>
       </div>

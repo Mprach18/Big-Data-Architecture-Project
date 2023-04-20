@@ -145,7 +145,6 @@ def fetchTrackDetails():
     job_response = []
         
     features = get_audio_features(request_body)
-    #print('result: ',features)
     
     return job_response
 

@@ -21,7 +21,7 @@ function SongCard({
   setCurrentTrack
 }: SongCardProps) {
   return (
-    <Card className="song-card">
+    <Card className="song-card bg-dark text-white">
       <img src={images[2].url} />
       <Card.Body>
         <Card.Title>{name}</Card.Title>
