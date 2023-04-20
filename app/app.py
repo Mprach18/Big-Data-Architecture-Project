@@ -144,18 +144,18 @@ def getPlaylist():
 @app.route('/fetch-track-details', methods=['POST'])
 def fetchTrackDetails():
     request_body = json.loads(request.data.decode('utf-8'))
-    
     job_response = []
-        
+    uuid = request_body['uid']
     input_features = get_audio_features(request_body)
     #print('result: ',features)
     
-    response = trigger_recommend_job(input_features)
+    response = trigger_recommend_job(input_features, uuid)
     print('response: ', response)
     
     if response == 0:
         print("The job execution was successful")
-        print(fetchOutput())
+        recommendations = fetchOutput(uuid)
+        print('recommendations: \n\n', recommendations)
     else:
         print("The job execution was unsuccessful")
     
@@ -240,10 +240,10 @@ def get_audio_features(request_body):
     return transformed_input
     
 #The function is used to trigger the main recommendation spark job
-def trigger_recommend_job(transformed_input):
+def trigger_recommend_job(transformed_input,uuid):
     jobExecFile = 'server.py'
     # set key credentials file path
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"/Users/Dell/Desktop/Big data architecture project/BDAProject/Big-Data-Architecture-Project/app/spotifysongrecommendation-7182b64849ed.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"/Users/Dell/Desktop/Big data architecture project/BDAProject/Big-Data-Architecture-Project/app/spotifysongrecommendation-adc2bc147649.json"
     #converting the dataframe into a string literal
     transformedInput_string = transformed_input.to_string()
     #transformedInput_string = transformed_input.to_string(index=False)
@@ -251,7 +251,7 @@ def trigger_recommend_job(transformed_input):
     print('type of transformedInput_string: ',transformedInput_string)
     # cmd = ['python', jobExecFile] + list(transformedInput_string)
     # result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    result = subprocess.call(['python', 'server.py', transformedInput_string])
+    result = subprocess.call(['python', 'server.py', transformedInput_string,str(uuid)])
     # if result.returncode != 0:
     #     print(f"Error running {jobExecFile}:")
     #     print(result.stderr)
@@ -260,7 +260,7 @@ def trigger_recommend_job(transformed_input):
     print('result: ',result)
     return result
 
-def fetchOutput():
+def fetchOutput(uuid):
     
     # set key credentials file path
     #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"spotifysongrecommendation-credentials.json"
@@ -268,11 +268,11 @@ def fetchOutput():
     storage_client = storage.Client()
     bucket = storage_client.bucket('nsr_data')
     file_content = list()
-    blobs = bucket.list_blobs(prefix='output-final-2023')
+    blobs = bucket.list_blobs(prefix=str(uuid)+".csv")
     #print(type(blobs))
     for i, blob in enumerate(blobs):
       if i > 1:
-        print(blob)
+        #print(blob)
         content = blob.download_as_bytes()
         content = str(content).split('b\'')[1].split('\\n')[1:-1]
         #print(content)

@@ -26,8 +26,10 @@ main_python_file_uri = 'gs://nsr_data/notebooks/jupyter/Shivam_recommendation-ma
 
 #get commandline arguments 
 args = sys.argv[1]
+uuid = sys.argv[2]
 print('Type for command-line arguments: ', type(args))
 print('\n command-line arguments: ', args)
+print('uuid: ',uuid)
 
 # Set any additional Python files your job needs
 # python_file_uris = ['gs://my-bucket/my-dependency.egg']
@@ -43,9 +45,12 @@ job = {
     'pyspark_job': {
         'main_python_file_uri': main_python_file_uri,
         # 'python_file_uris': python_file_uris,
-        'args': [args]
+        'args': [args,uuid]
     }
 }
 
 # Submit the job to Dataproc
 operation = client.submit_job_as_operation(project_id=project_id, region=region, job=job)
+response = operation.result()
+
+print(response)
