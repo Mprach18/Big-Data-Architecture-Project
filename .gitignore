@@ -27,6 +27,7 @@ __pycache__/
 env/
 app/config.py
 app/.flaskenv
+app/spotifysongrecommendation-7182b64849ed.json
 
 #recommendation app
 .cache
