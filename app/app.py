@@ -182,10 +182,10 @@ def get_audio_features(request_body):
         print('track_artist', track_artists[0])
         track_first_artist = item['artists'][0]['name']
 
+
         track = {
             'id': track_id,
             'name': track_name,
-            'all_artists': track_artists,
             'all_artists': track_artists,
             'first_artist': track_first_artist
         }
