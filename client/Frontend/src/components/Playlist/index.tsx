@@ -42,7 +42,7 @@ const SingleListItem = ({
   const [isAdded, setIsAdded] = useState(false)
 
   return (
-    <ListGroup.Item className="d-flex bg-dark">
+    <ListGroup.Item className="d-flex bg-dark mb-2">
       <div className="col-2">
         <img width="50px" height="50px" src={item.album.images[0].url} alt="Song cover" />
       </div>
