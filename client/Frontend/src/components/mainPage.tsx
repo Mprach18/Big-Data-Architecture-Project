@@ -149,7 +149,8 @@ function MainPage() {
     const url = 'http://127.0.0.1:5000/fetch-track-details'
     const data = {
       playlist: playlist,
-      uid: findHash(playlist)
+      uid: findHash(playlist),
+      access_token: accessToken
     }
     console.log('data-', data)
     fetch(url, {
