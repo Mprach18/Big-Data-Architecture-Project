@@ -148,8 +148,8 @@ def fetchTrackDetails():
     uuid = request_body['uid']
     input_features = get_audio_features(request_body)
     #print('result: ',features)
-    
-    response = trigger_recommend_job(input_features, uuid)
+    input_genres = ['country','rock','metal']
+    response = trigger_recommend_job(input_features, uuid, input_genres)
     print('response: ', response)
     
     if response == 0:
@@ -240,10 +240,11 @@ def get_audio_features(request_body):
     return transformed_input
     
 #The function is used to trigger the main recommendation spark job
-def trigger_recommend_job(transformed_input,uuid):
+def trigger_recommend_job(transformed_input,uuid,input_genres):
     jobExecFile = 'server.py'
     # set key credentials file path
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"/Users/Dell/Desktop/Big data architecture project/BDAProject/Big-Data-Architecture-Project/app/spotifysongrecommendation-adc2bc147649.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"./credentials.json"
+    # r"./credentials.json"
     #converting the dataframe into a string literal
     transformedInput_string = transformed_input.to_string()
     #transformedInput_string = transformed_input.to_string(index=False)
@@ -251,7 +252,8 @@ def trigger_recommend_job(transformed_input,uuid):
     print('type of transformedInput_string: ',transformedInput_string)
     # cmd = ['python', jobExecFile] + list(transformedInput_string)
     # result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    result = subprocess.call(['python', 'server.py', transformedInput_string,str(uuid)])
+    
+    result = subprocess.call(['python', 'server.py', transformedInput_string,str(uuid),",".join(input_genres)])
     # if result.returncode != 0:
     #     print(f"Error running {jobExecFile}:")
     #     print(result.stderr)
