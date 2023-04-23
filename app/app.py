@@ -149,7 +149,7 @@ def fetchTrackDetails():
     input_features = get_audio_features(request_body)
     # print('result: ',features)
     input_genres = ['country','rock','metal']
-    
+    response= trigger_recommend_job(input_features,uuid,input_genres)
     print('response: ', response)
     
     # if response == 0:
@@ -274,7 +274,7 @@ def fetchOutput():
     access_token = args.get('access_token')
     print('flask uuid-', uuid)
     # set key credentials file path
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"/home/pritalee/BDArchitecture/Big-Data-Architecture-Project/app/spotifysongrecommendation-adc2bc147649.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"./credentials.json"
 
     storage_client = storage.Client()
     bucket = storage_client.bucket('nsr_data')
