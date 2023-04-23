@@ -1,0 +1,19 @@
+FROM node:14.17.0-alpine AS client
+EXPOSE 8080
+# Set the working directory for the client
+WORKDIR /Frontend
+
+# Copy the package.json and package-lock.json files to the working directory
+COPY Frontend/package*.json ./
+
+# Install dependencies for the client
+RUN npm install
+
+# Copy the rest of the client files to the working directory
+COPY Frontend .
+
+# Build the client
+RUN npm run build
+
+CMD ["sh", "-c", "npm start"]
+
