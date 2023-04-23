@@ -291,7 +291,6 @@ def fetchOutput():
           data = data.split(",")
           file_content.append(data)
         #file_content.append(blob.download_as_string())
-    print(file_content)
 
     df = pd.DataFrame(file_content[:20], columns=['id_ctf', 'cosine_similarity'])
 

@@ -197,7 +197,7 @@ function MainPage() {
   // }, [uuid])
 
   const pollData = (uuid: string) => {
-    const url = 'http://localhost:5000/poll-data'
+    const url = 'http://127.0.0.1:5000/poll-data'
     console.log('uuid-', uuid)
     fetch(`${url}?uuid=${uuid}&access_token=${accessToken}`, {
       method: 'GET',
