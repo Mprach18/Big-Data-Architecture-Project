@@ -52,6 +52,7 @@ const SingleListItem = ({
       </div>
       <div className="col-2">
         <Button
+          variant="dark"
           style={{ backgroundColor: '#1DB954' }}
           size="lg"
           className="rounded-circle text-white"

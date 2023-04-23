@@ -13,32 +13,20 @@ const TOP_SONGS_GLOBAL_PLAYLIST_ID = '37i9dQZEVXbNG2KDcFcKOF'
 interface RecommendationsWrapperProps {
   access_token: string
   setCurrentTrack: (track: any) => void
+  setRecommendations: (recommendations: any) => void
+  recommendations: any
+  title: string
+  setTitle: (title: string) => void
 }
 
-function RecommendationsWrapper({ access_token, setCurrentTrack }: RecommendationsWrapperProps) {
-  const [recommendations, setRecommendations] = useState([])
-  const [title, setTitle] = useState('Top Songs')
-
-  useEffect(() => {
-    fetch(`http://127.0.0.1:5000/get-playlist`, {
-      method: 'POST',
-      body: JSON.stringify({
-        playlist_id: TOP_SONGS_GLOBAL_PLAYLIST_ID,
-        playlist_limit: 10,
-        access_token
-      })
-    })
-      .then((response: Response) => response.json())
-      .then((data: any) => {
-        setRecommendations(data.items)
-        setTitle('Top Songs')
-        console.log('recommendationdata-', data)
-      })
-      .catch((err) => {
-        console.error('Error fetching songs:', err)
-      })
-  }, [])
-
+function RecommendationsWrapper({
+  access_token,
+  setCurrentTrack,
+  setRecommendations,
+  recommendations,
+  title,
+  setTitle
+}: RecommendationsWrapperProps) {
   return (
     <Row>
       <Row>

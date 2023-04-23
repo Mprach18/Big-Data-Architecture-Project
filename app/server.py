@@ -27,6 +27,7 @@ main_python_file_uri = 'gs://nsr_data/notebooks/jupyter/Shivam_recommendation-ma
 #get commandline arguments 
 args = sys.argv[1]
 uuid = sys.argv[2]
+input_genres = sys.argv[3]
 print('Type for command-line arguments: ', type(args))
 print('\n command-line arguments: ', args)
 print('uuid: ',uuid)
@@ -45,7 +46,7 @@ job = {
     'pyspark_job': {
         'main_python_file_uri': main_python_file_uri,
         # 'python_file_uris': python_file_uris,
-        'args': [args,uuid]
+        'args': [args,uuid,input_genres]
     }
 }
 

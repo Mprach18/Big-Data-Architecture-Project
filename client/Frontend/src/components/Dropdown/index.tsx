@@ -20,7 +20,7 @@ const DropDown: React.FC<DropdownProps> = ({ title, items, handleSelectOption })
     handleSelectOption(item) // Send selected item to parent component
   }
   return (
-    <Dropdown>
+    <Dropdown role="menuitemcheckbox">
       <Dropdown.Toggle variant="secondary" id="dropdown-genres" size="lg">
         {typeof items === 'string'
           ? selectedGenre !== ''

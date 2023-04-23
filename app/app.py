@@ -147,19 +147,26 @@ def fetchTrackDetails():
     job_response = []
     uuid = request_body['uid']
     input_features = get_audio_features(request_body)
-    #print('result: ',features)
+    # print('result: ',features)
+    input_genres = ['country','rock','metal']
     
-    response = trigger_recommend_job(input_features, uuid)
+    response = trigger_recommend_job(input_features, uuid, input_genres)
     print('response: ', response)
     
-    if response == 0:
-        print("The job execution was successful")
-        recommendations = fetchOutput(uuid)
-        print('recommendations: \n\n', recommendations)
-    else:
-        print("The job execution was unsuccessful")
+    # if response == 0:
+    #     print("The job execution was successful")
+    #     recommendations = fetchOutput(uuid)
+    #     print('recommendations: \n\n', recommendations)
+    # else:
+    #     print("The job execution was unsuccessful")
     
-    return job_response
+    # recommendations = [['7uZmONqDppfco4s50aMmx1', '0.83873284'], ['4q59sjdPPQmGjDVGsx02Hy', '0.83777577'], ['1Lqtw8APVMD23acOllUfUu', '0.8375196'], ['6rUt2EDnaqMKUsEb0qygwz', '0.8367458'], ['7d0DM0z1IWGIyXwlgudr64', '0.8316435'], ['3RG2P8VtBOUKdMdUaZHUv3', '0.8272706'], ['7oRIUDYMbWbHdwrx8HqfIH', '0.8224505'], ['6FLYWuM0AMPiJ9cyogNmGe', '0.8212282'], ['1ptpvqV9Rnoi8ZJ596tmB3', '0.82101995'], ['3xq8LCDTE2pvV06DmCn2xZ', '0.81956'], ['0d4iukDS3mdXnXS3JlozvT', '0.81803393'], ['40jCPYWzUkcqwSL7EzUfDW', '0.8180007'], ['11L0WvaQ3FOe4WFyOIGX0h', '0.8170904'], ['4HQuGLKECg9iwtKOG6gnYn', '0.8165051'], ['07orPfKPhbyceTuSlk6cZM', '0.81594497'], ['4EWA5n8mJZhgKIbI35Nzpd', '0.8148775'], ['015ljpgRzoOEwCEST5CGbb', '0.8142322'], ['3xnIizYJrsNft0njBILhhg', '0.8138499'], ['7f0O6FvS1fZ8CgVE2Yxssq', '0.81366044'], ['3m1jHtGgKbEMriNxCf2ohq', '0.81267977'], ['0Q0KufPcFv8JdcZD37lkYV', '0.8124509'], ['53SfNSJPGJhzAaHNJ5FF2o', '0.81212676'], ['1OhhzbdbjE5EYjA3V5EqtD', '0.81169087'], ['00S8vsrd1qrug1GmNHRevC', '0.8116732'], ['5eIpaJBmXyHffX9JxPuuQZ', '0.81111956'], ['6kboD51CMtlnkBtcKy3jTe', '0.81088287'], ['0hGhA3dy4OoVEUkTjP2hGb', '0.8105324'], ['3eeS7jfbVARmwKEOE7FCe8', '0.8103645'], ['7bZmlvSStaZaYy0sqAOhcG', '0.81028'], ['574wV3oIO2ydHDz5EUexeH', '0.8100649'], ['3SVkAD87rNdCbuC8eP91pj', '0.8095997'], ['5nJZEIBOBgTUwEiCycoh8R', '0.80941516'], ['29D2tESU7h1i9ARMDO7PBv', '0.80936706'], ['1zHR191BSzcwKRKUhxkQDV', '0.8093202'], ['36XGpbnqbGNifCbI2CaaZ8', '0.8091824'], ['1S5cmaCz64GvErRb6l6zt6', '0.8091824'], ['1xqtzNUgDPIPk5y8oP9SDC', '0.8091824'], ['4y17KLlgZdpyW9ON2FFpIf', '0.8086421'], ['6sIXiFGXnKe3mlrUlRRpss', '0.808428'], ['4eNz7NWSTM5A5Daxod2dX2', '0.8083198']]
+    # print('recommendations-', recommendations)
+    
+    # return jsonify({'recommendations':recommendations})
+    return 'job triggered successfully'
+
+
 
 #The function fetches granular level audio features for each track of the playlist
 def get_audio_features(request_body):
@@ -240,10 +247,10 @@ def get_audio_features(request_body):
     return transformed_input
     
 #The function is used to trigger the main recommendation spark job
-def trigger_recommend_job(transformed_input,uuid):
+def trigger_recommend_job(transformed_input,uuid, input_genres):
     jobExecFile = 'server.py'
     # set key credentials file path
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"/Users/Dell/Desktop/Big data architecture project/BDAProject/Big-Data-Architecture-Project/app/spotifysongrecommendation-adc2bc147649.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"/home/pritalee/BDArchitecture/Big-Data-Architecture-Project/app/spotifysongrecommendation-adc2bc147649.json"
     #converting the dataframe into a string literal
     transformedInput_string = transformed_input.to_string()
     #transformedInput_string = transformed_input.to_string(index=False)
@@ -251,7 +258,7 @@ def trigger_recommend_job(transformed_input,uuid):
     print('type of transformedInput_string: ',transformedInput_string)
     # cmd = ['python', jobExecFile] + list(transformedInput_string)
     # result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    result = subprocess.call(['python', 'server.py', transformedInput_string,str(uuid)])
+    result = subprocess.call(['python3', 'server.py', transformedInput_string,str(uuid), ",".join(input_genres)])
     # if result.returncode != 0:
     #     print(f"Error running {jobExecFile}:")
     #     print(result.stderr)
@@ -260,10 +267,14 @@ def trigger_recommend_job(transformed_input,uuid):
     print('result: ',result)
     return result
 
-def fetchOutput(uuid):
-    
+@app.route('/poll-data', methods=['GET'])
+def fetchOutput():
+    args = request.args
+    uuid = args.get('uuid')
+    access_token = args.get('access_token')
+    print('flask uuid-', uuid)
     # set key credentials file path
-    #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"spotifysongrecommendation-credentials.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"/home/pritalee/BDArchitecture/Big-Data-Architecture-Project/app/spotifysongrecommendation-adc2bc147649.json"
 
     storage_client = storage.Client()
     bucket = storage_client.bucket('nsr_data')
@@ -284,4 +295,27 @@ def fetchOutput(uuid):
 
     df = pd.DataFrame(file_content[:20], columns=['id_ctf', 'cosine_similarity'])
 
-    return df
+    return get_song_details(file_content, access_token)
+
+
+#create a function to fetch song details from spotifyAPI using track id
+def get_song_details(results, access_token):
+    recommendations = []
+    for track in results:
+        track_id = track[0]
+        track_score = track[1]
+
+        auth = 'Bearer '+ access_token
+        headers = {'Authorization': auth}
+        SEARCH_ENDPOINT = "{}/{}/{}".format(SPOTIFY_API_URL, 'tracks', track_id)
+        resp = requests.get(SEARCH_ENDPOINT, headers=headers)
+        resp = resp.json()
+        resp['similarity_score'] = track_score
+        recommendations.append({'track': resp})
+
+    return jsonify({'recommendations':recommendations})
+
+    
+
+
+

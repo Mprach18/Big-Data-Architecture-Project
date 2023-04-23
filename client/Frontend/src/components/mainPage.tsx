@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './style.css'
 import Button from 'react-bootstrap/Button'
 import Tab from 'react-bootstrap/Tab'
@@ -13,7 +13,7 @@ import RecommendationsWrapper from './Recommendations'
 import ItemList from './Playlist'
 import * as CryptoJS from 'crypto-js'
 import Dropdown from './Dropdown'
-
+import ProgressBar from 'react-bootstrap/ProgressBar'
 interface playlistItem {
   name: string
   id: number
@@ -28,6 +28,8 @@ interface playlistItem {
   }[]
 }
 
+const TOP_SONGS_GLOBAL_PLAYLIST_ID = '37i9dQZEVXbNG2KDcFcKOF'
+
 function MainPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [playlistSearchTerm, setPlaylistSearchTerm] = useState('')
@@ -36,6 +38,9 @@ function MainPage() {
   const [playlist, setPlaylist] = useState<playlistItem[]>([])
   const [playlistLinkResults, setPlayistLinkResults] = useState([])
   const [noOfRecommendations, setNoOfRecommendations] = useState(5)
+  const [loading, setLoading] = useState(false)
+  const [recommendations, setRecommendations] = useState([])
+  const [title, setTitle] = useState('Top Songs')
   const genres = [
     'Pop',
     'Rock',
@@ -65,6 +70,30 @@ function MainPage() {
     uri: ''
   })
   const { accessToken, isLoading } = useAccessToken()
+
+  let iid: string | number | NodeJS.Timer | undefined
+
+  useEffect(() => {
+    console.log('accessToken-', accessToken)
+    if (accessToken) {
+      fetch(`http://127.0.0.1:5000/get-playlist`, {
+        method: 'POST',
+        body: JSON.stringify({
+          playlist_id: TOP_SONGS_GLOBAL_PLAYLIST_ID,
+          playlist_limit: 10,
+          access_token: accessToken
+        })
+      })
+        .then((response: Response) => response.json())
+        .then((data: any) => {
+          setRecommendations(data.items)
+          setTitle('Top Songs')
+        })
+        .catch((err) => {
+          console.error('Error fetching songs:', err)
+        })
+    }
+  }, [accessToken])
 
   function handleChange({ target: { value = '' } }) {
     setSearchTerm(value)
@@ -159,22 +188,68 @@ function MainPage() {
     setPlayistLinkResults([])
   }
 
+  // useEffect(() => {
+  //   // const iid = setInterval(() => {
+  //   //   pollData(uuid)
+  //   // }, 1000)
+  //   const iid = setInterval(pollData(uuid), 5000)
+  //   setIntervalId(iid)
+  // }, [uuid])
+
+  const pollData = (uuid: string) => {
+    const url = 'http://localhost:5000/poll-data'
+    console.log('uuid-', uuid)
+    fetch(`${url}?uuid=${uuid}&access_token=${accessToken}`, {
+      method: 'GET',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('poll data recommendations-', data)
+        if (iid && data.recommendations.length > 0) {
+          clearInterval(iid)
+          setLoading(false)
+          setTitle('Recommendations')
+          setRecommendations(data.recommendations)
+        }
+      })
+      .catch((error) => console.log('poll-data api error-', error))
+  }
+
   function sendData() {
     const url = 'http://127.0.0.1:5000/fetch-track-details'
+    const uuid = findHash(playlist)
+    // setUuid(uuid)
     const data = {
       playlist: playlist,
-      uid: findHash(playlist),
+      uid: uuid,
       access_token: accessToken,
       genre: selectedGenre,
       no_of_recommendations: noOfRecommendations
     }
-    console.log('data-', data)
+    console.log('send data-', data)
+    setLoading(true)
     fetch(url, {
       method: 'POST',
       body: JSON.stringify(data)
     })
       .then((response) => response.json())
-      .catch((error) => console.log('api error-', error))
+      // .then((data: any) => {
+
+      // })
+      .catch((error) => {
+        console.log('api error-', error)
+        setLoading(false)
+      })
+
+    iid = setInterval(() => {
+      pollData(uuid)
+    }, 5000)
+    // const iid = setInterval(pollData(uuid), 5000)
+    // setIntervalId(iid)
   }
 
   if (!accessToken || isLoading) {
@@ -354,8 +429,42 @@ function MainPage() {
               </Tabs>
             </Row>
           </Col>
-          <Col className="Recommendations">
-            <RecommendationsWrapper access_token={accessToken} setCurrentTrack={setCurrentTrack} />
+          <Col>
+            {!loading && (
+              <Col className="Recommendations">
+                <RecommendationsWrapper
+                  access_token={accessToken}
+                  setCurrentTrack={setCurrentTrack}
+                  setRecommendations={setRecommendations}
+                  recommendations={recommendations}
+                  title={title}
+                  setTitle={setTitle}
+                />
+              </Col>
+            )}
+            <Col>
+              {/* <ListGroup>
+                {!loading &&
+                  recommendations.length > 0 &&
+                  recommendations.map((recommendation: any) => {
+                    return (
+                      <ListGroup.Item
+                        key={recommendation[0]}
+                        variant="dark"
+                        className="d-flex mb-2 bg-dark">
+                        <div className="text-white">
+                          {recommendation[0]}- {recommendation[1]}
+                        </div>
+                      </ListGroup.Item>
+                    )
+                  })}
+              </ListGroup> */}
+              {loading && (
+                <Col>
+                  <ProgressBar now={60} label={`${60}%`} />
+                </Col>
+              )}
+            </Col>
           </Col>
         </Row>
       </Container>
