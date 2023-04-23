@@ -150,7 +150,6 @@ def fetchTrackDetails():
     # print('result: ',features)
     input_genres = ['country','rock','metal']
     
-    response = trigger_recommend_job(input_features, uuid, input_genres)
     print('response: ', response)
     
     # if response == 0:
@@ -247,10 +246,11 @@ def get_audio_features(request_body):
     return transformed_input
     
 #The function is used to trigger the main recommendation spark job
-def trigger_recommend_job(transformed_input,uuid, input_genres):
+def trigger_recommend_job(transformed_input,uuid,input_genres):
     jobExecFile = 'server.py'
     # set key credentials file path
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"/home/pritalee/BDArchitecture/Big-Data-Architecture-Project/app/spotifysongrecommendation-adc2bc147649.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"./credentials.json"
+    # r"./credentials.json"
     #converting the dataframe into a string literal
     transformedInput_string = transformed_input.to_string()
     #transformedInput_string = transformed_input.to_string(index=False)

@@ -3,6 +3,9 @@ from google.cloud import dataproc_v1 as dataproc
 from google.api_core.client_options import ClientOptions
 import sys
 
+# import os
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"/Users/anshsachdeva/Downloads/spotifysongrecommendation-4b4a5f74f21e.json"
+
 # Set the region of your cluster
 region = 'us-central1'
 
@@ -22,15 +25,14 @@ job_id = 'test-job'
 
 # Set the main Python file for your job
 main_python_file_uri = 'gs://nsr_data/notebooks/jupyter/Shivam_recommendation-map.py'
-#main_python_file_uri = 'gs://nsr_data/notebooks/jupyter/testforargs.py'
 
 #get commandline arguments 
 args = sys.argv[1]
 uuid = sys.argv[2]
 input_genres = sys.argv[3]
-print('Type for command-line arguments: ', type(args))
-print('\n command-line arguments: ', args)
-print('uuid: ',uuid)
+# print('Type for command-line arguments: ', type(args))
+# print('\n command-line arguments: ', args)
+# print('uuid: ',uuid)
 
 # Set any additional Python files your job needs
 # python_file_uris = ['gs://my-bucket/my-dependency.egg']
