@@ -82,7 +82,7 @@ def callback():
 # make it a post request
 @app.route('/refresh', methods=['POST'])
 def refresh():
-    body = request.form
+    body = json.loads(request.data.decode('utf-8'))
     refresh_token = body['refresh_token']
     auth_header = base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()
     headers = {'Authorization': 'Basic ' + auth_header}
@@ -144,26 +144,18 @@ def getPlaylist():
 @app.route('/fetch-track-details', methods=['POST'])
 def fetchTrackDetails():
     request_body = json.loads(request.data.decode('utf-8'))
-    job_response = []
     uuid = request_body['uid']
+    input_genres = request_body['genres']
     input_features = get_audio_features(request_body)
-    # print('result: ',features)
-    input_genres = ['country','rock','metal']
     response= trigger_recommend_job(input_features,uuid,input_genres)
     print('response: ', response)
     
-    # if response == 0:
-    #     print("The job execution was successful")
-    #     recommendations = fetchOutput(uuid)
-    #     print('recommendations: \n\n', recommendations)
-    # else:
-    #     print("The job execution was unsuccessful")
-    
-    # recommendations = [['7uZmONqDppfco4s50aMmx1', '0.83873284'], ['4q59sjdPPQmGjDVGsx02Hy', '0.83777577'], ['1Lqtw8APVMD23acOllUfUu', '0.8375196'], ['6rUt2EDnaqMKUsEb0qygwz', '0.8367458'], ['7d0DM0z1IWGIyXwlgudr64', '0.8316435'], ['3RG2P8VtBOUKdMdUaZHUv3', '0.8272706'], ['7oRIUDYMbWbHdwrx8HqfIH', '0.8224505'], ['6FLYWuM0AMPiJ9cyogNmGe', '0.8212282'], ['1ptpvqV9Rnoi8ZJ596tmB3', '0.82101995'], ['3xq8LCDTE2pvV06DmCn2xZ', '0.81956'], ['0d4iukDS3mdXnXS3JlozvT', '0.81803393'], ['40jCPYWzUkcqwSL7EzUfDW', '0.8180007'], ['11L0WvaQ3FOe4WFyOIGX0h', '0.8170904'], ['4HQuGLKECg9iwtKOG6gnYn', '0.8165051'], ['07orPfKPhbyceTuSlk6cZM', '0.81594497'], ['4EWA5n8mJZhgKIbI35Nzpd', '0.8148775'], ['015ljpgRzoOEwCEST5CGbb', '0.8142322'], ['3xnIizYJrsNft0njBILhhg', '0.8138499'], ['7f0O6FvS1fZ8CgVE2Yxssq', '0.81366044'], ['3m1jHtGgKbEMriNxCf2ohq', '0.81267977'], ['0Q0KufPcFv8JdcZD37lkYV', '0.8124509'], ['53SfNSJPGJhzAaHNJ5FF2o', '0.81212676'], ['1OhhzbdbjE5EYjA3V5EqtD', '0.81169087'], ['00S8vsrd1qrug1GmNHRevC', '0.8116732'], ['5eIpaJBmXyHffX9JxPuuQZ', '0.81111956'], ['6kboD51CMtlnkBtcKy3jTe', '0.81088287'], ['0hGhA3dy4OoVEUkTjP2hGb', '0.8105324'], ['3eeS7jfbVARmwKEOE7FCe8', '0.8103645'], ['7bZmlvSStaZaYy0sqAOhcG', '0.81028'], ['574wV3oIO2ydHDz5EUexeH', '0.8100649'], ['3SVkAD87rNdCbuC8eP91pj', '0.8095997'], ['5nJZEIBOBgTUwEiCycoh8R', '0.80941516'], ['29D2tESU7h1i9ARMDO7PBv', '0.80936706'], ['1zHR191BSzcwKRKUhxkQDV', '0.8093202'], ['36XGpbnqbGNifCbI2CaaZ8', '0.8091824'], ['1S5cmaCz64GvErRb6l6zt6', '0.8091824'], ['1xqtzNUgDPIPk5y8oP9SDC', '0.8091824'], ['4y17KLlgZdpyW9ON2FFpIf', '0.8086421'], ['6sIXiFGXnKe3mlrUlRRpss', '0.808428'], ['4eNz7NWSTM5A5Daxod2dX2', '0.8083198']]
-    # print('recommendations-', recommendations)
-    
-    # return jsonify({'recommendations':recommendations})
-    return 'job triggered successfully'
+    if response == 0:
+        print("The job execution was successful")
+        return jsonify({'status': 'success', 'message': 'job triggered successfully'})
+    else:
+        print("The job execution was unsuccessful")
+        return jsonify({'status': 'failure', 'message': 'job triggered unsuccessfully'})
 
 
 

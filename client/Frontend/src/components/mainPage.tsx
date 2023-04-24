@@ -44,15 +44,15 @@ function MainPage() {
   const [title, setTitle] = useState('Top Songs')
   const [progress, setProgress] = useState(0)
   const genresOptions = [
-    { value: 'Pop', label: 'Pop' },
-    { value: 'Rock', label: 'Rock' },
-    { value: 'Hip-hop', label: 'Hip-hop' },
-    { value: 'Jazz', label: 'Jazz' },
-    { value: 'Classical', label: 'Classical' },
-    { value: 'Country', label: 'Country' },
-    { value: 'Blues', label: 'Blues' },
-    { value: 'Metal', label: 'Metal' },
-    { value: 'Orchestra', label: 'Orchestra' }
+    { value: 'pop', label: 'pop' },
+    { value: 'rock', label: 'rock' },
+    { value: 'hiphop', label: 'hiphop' },
+    { value: 'jazz', label: 'jazz' },
+    { value: 'classical', label: 'classical' },
+    { value: 'country', label: 'country' },
+    { value: 'blues', label: 'blues' },
+    { value: 'metal', label: 'metal' },
+    { value: 'orchestra', label: 'orchestra' }
   ]
   const noOfRecommendationsOptions = [5, 10, 20, 30, 40]
   const [currentTrack, setCurrentTrack] = useState({
