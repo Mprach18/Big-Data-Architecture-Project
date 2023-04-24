@@ -14,6 +14,7 @@ import ItemList from './Playlist'
 import * as CryptoJS from 'crypto-js'
 import Dropdown from './Dropdown'
 import ProgressBar from 'react-bootstrap/ProgressBar'
+import Select from 'react-select'
 interface playlistItem {
   name: string
   id: number
@@ -33,7 +34,7 @@ const TOP_SONGS_GLOBAL_PLAYLIST_ID = '37i9dQZEVXbNG2KDcFcKOF'
 function MainPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [playlistSearchTerm, setPlaylistSearchTerm] = useState('')
-  const [selectedGenre, setSelectedGenre] = useState('')
+  const [selectedGenre, setSelectedGenre] = useState([])
   const [searchResults, setSearchResults] = useState([])
   const [playlist, setPlaylist] = useState<playlistItem[]>([])
   const [playlistLinkResults, setPlayistLinkResults] = useState([])
@@ -41,16 +42,17 @@ function MainPage() {
   const [loading, setLoading] = useState(false)
   const [recommendations, setRecommendations] = useState([])
   const [title, setTitle] = useState('Top Songs')
-  const genres = [
-    'Pop',
-    'Rock',
-    'Hip-hop',
-    'Jazz',
-    'Classical',
-    'Country',
-    'Blues',
-    'Metal',
-    'Orchestra'
+  const [progress, setProgress] = useState(0)
+  const genresOptions = [
+    { value: 'Pop', label: 'Pop' },
+    { value: 'Rock', label: 'Rock' },
+    { value: 'Hip-hop', label: 'Hip-hop' },
+    { value: 'Jazz', label: 'Jazz' },
+    { value: 'Classical', label: 'Classical' },
+    { value: 'Country', label: 'Country' },
+    { value: 'Blues', label: 'Blues' },
+    { value: 'Metal', label: 'Metal' },
+    { value: 'Orchestra', label: 'Orchestra' }
   ]
   const noOfRecommendationsOptions = [5, 10, 20, 30, 40]
   const [currentTrack, setCurrentTrack] = useState({
@@ -74,7 +76,6 @@ function MainPage() {
   let iid: string | number | NodeJS.Timer | undefined
 
   useEffect(() => {
-    console.log('accessToken-', accessToken)
     if (accessToken) {
       fetch(`http://127.0.0.1:5000/get-playlist`, {
         method: 'POST',
@@ -153,9 +154,11 @@ function MainPage() {
     }
   }
 
-  const handleGenreSelectOption = (option: string) => {
-    console.log('option-', option)
-    setSelectedGenre(option)
+  const handleGenreSelectOption = (options: any) => {
+    console.log('option-', options)
+    // edit array to only store values
+    const selectedOptions = options.map((option: any) => option.value)
+    setSelectedGenre(selectedOptions)
   }
 
   const handleNoOfRecommendationsOption = (option: number) => {
@@ -188,17 +191,11 @@ function MainPage() {
     setPlayistLinkResults([])
   }
 
-  // useEffect(() => {
-  //   // const iid = setInterval(() => {
-  //   //   pollData(uuid)
-  //   // }, 1000)
-  //   const iid = setInterval(pollData(uuid), 5000)
-  //   setIntervalId(iid)
-  // }, [uuid])
-
   const pollData = (uuid: string) => {
     const url = 'http://127.0.0.1:5000/poll-data'
     console.log('uuid-', uuid)
+    setProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + 2.8))
+    console.log('progress-', progress)
     fetch(`${url}?uuid=${uuid}&access_token=${accessToken}`, {
       method: 'GET',
       headers: {
@@ -222,12 +219,11 @@ function MainPage() {
   function sendData() {
     const url = 'http://127.0.0.1:5000/fetch-track-details'
     const uuid = findHash(playlist)
-    // setUuid(uuid)
     const data = {
       playlist: playlist,
       uid: uuid,
       access_token: accessToken,
-      genre: selectedGenre,
+      genres: selectedGenre,
       no_of_recommendations: noOfRecommendations
     }
     console.log('send data-', data)
@@ -237,19 +233,21 @@ function MainPage() {
       body: JSON.stringify(data)
     })
       .then((response) => response.json())
-      // .then((data: any) => {
-
-      // })
+      .then((data) => {
+        if (data.status === 'success') {
+          setLoading(true)
+        } else {
+          setLoading(true)
+        }
+      })
       .catch((error) => {
         console.log('api error-', error)
-        setLoading(false)
+        setLoading(true)
       })
 
     iid = setInterval(() => {
       pollData(uuid)
     }, 5000)
-    // const iid = setInterval(pollData(uuid), 5000)
-    // setIntervalId(iid)
   }
 
   if (!accessToken || isLoading) {
@@ -283,7 +281,6 @@ function MainPage() {
                       </Button>
                     </div>
                   </div>
-
                   {searchTerm && (
                     <div className="row">
                       <div className="col-10" style={{ zIndex: 2 }}>
@@ -293,7 +290,6 @@ function MainPage() {
                       </div>
                     </div>
                   )}
-
                   {!searchTerm && (
                     <>
                       {playlist.length > 0 && (
@@ -335,14 +331,15 @@ function MainPage() {
                               ))}
                             </ListGroup>
                           </div>
+                          <Col className="text-start">
+                            <Select
+                              isMulti
+                              options={genresOptions}
+                              onChange={handleGenreSelectOption}
+                              autoFocus={true}
+                            />
+                          </Col>
                           <Row>
-                            <Col className="text-start">
-                              <Dropdown
-                                title="Genre"
-                                items={genres}
-                                handleSelectOption={handleGenreSelectOption}
-                              />
-                            </Col>
                             <Col className="text-start">
                               <Dropdown
                                 title="No. of Recommendations"
@@ -384,7 +381,6 @@ function MainPage() {
                       <ItemList onChildData={handleAddToPlaylist} items={playlistLinkResults} />
                     )}
                   </div>
-
                   {!playlistSearchTerm && (
                     <>
                       {playlist.length > 0 && (
@@ -443,25 +439,9 @@ function MainPage() {
               </Col>
             )}
             <Col>
-              {/* <ListGroup>
-                {!loading &&
-                  recommendations.length > 0 &&
-                  recommendations.map((recommendation: any) => {
-                    return (
-                      <ListGroup.Item
-                        key={recommendation[0]}
-                        variant="dark"
-                        className="d-flex mb-2 bg-dark">
-                        <div className="text-white">
-                          {recommendation[0]}- {recommendation[1]}
-                        </div>
-                      </ListGroup.Item>
-                    )
-                  })}
-              </ListGroup> */}
               {loading && (
                 <Col>
-                  <ProgressBar now={60} label={`${60}%`} />
+                  <ProgressBar now={Math.round(progress)} label={`${Math.round(progress)}%`} />
                 </Col>
               )}
             </Col>
