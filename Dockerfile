@@ -40,7 +40,7 @@ COPY app .
 
 # Expose the port that the server will listen on
 # EXPOSE 8080
-EXPOSE 8080
+EXPOSE 5000
 
 # Start the Flask server
-CMD ["sh", "-c", "flask run"]
+CMD ["sh", "-c", "flask run -h 0.0.0.0"]
