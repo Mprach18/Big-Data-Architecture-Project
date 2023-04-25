@@ -14,6 +14,7 @@ WORKDIR /app
 # Copy the requirements.txt file to the working directory
 COPY app/requirements.txt .
 COPY app/credentials.json .
+COPY app/config.py .
 
 RUN python3 -m venv venv2
 #ENV PATH="/venv/bin:$PATH"
