@@ -30,6 +30,18 @@
   align-items: center;
 }
 
+.song-card > .remove-button {
+  width: 45px;
+  height: 45px;
+  border-radius: 100%;
+  background-color: green;
+  border-color: #ee5253;
+  margin-right: 0.6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .play-button > .play-button-icon {
   width: 20px;
   height: 20px;

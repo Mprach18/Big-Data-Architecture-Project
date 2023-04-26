@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import './style.css'
 import Button from 'react-bootstrap/Button'
-import Tab from 'react-bootstrap/Tab'
-import Tabs from 'react-bootstrap/Tabs'
 import { Container, Form, ListGroup } from 'react-bootstrap'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
@@ -12,8 +10,9 @@ import SpotifyPlayerWrapper from './Player'
 import RecommendationsWrapper from './Recommendations'
 import ItemList from './Playlist'
 import * as CryptoJS from 'crypto-js'
-import Dropdown from './Dropdown'
-import ProgressBar from 'react-bootstrap/ProgressBar'
+import Select from 'react-select'
+import { WaveSpinner } from 'react-spinners-kit'
+import SongCard from './SongCard'
 interface playlistItem {
   name: string
   id: number
@@ -28,31 +27,29 @@ interface playlistItem {
   }[]
 }
 
+const SERVER_URL = 'http://127.0.0.1:5000'
 const TOP_SONGS_GLOBAL_PLAYLIST_ID = '37i9dQZEVXbNG2KDcFcKOF'
 
 function MainPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [playlistSearchTerm, setPlaylistSearchTerm] = useState('')
-  const [selectedGenre, setSelectedGenre] = useState('')
+  const [selectedGenre, setSelectedGenre] = useState([])
   const [searchResults, setSearchResults] = useState([])
   const [playlist, setPlaylist] = useState<playlistItem[]>([])
-  const [playlistLinkResults, setPlayistLinkResults] = useState([])
-  const [noOfRecommendations, setNoOfRecommendations] = useState(5)
   const [loading, setLoading] = useState(false)
   const [recommendations, setRecommendations] = useState([])
   const [title, setTitle] = useState('Top Songs')
-  const genres = [
-    'Pop',
-    'Rock',
-    'Hip-hop',
-    'Jazz',
-    'Classical',
-    'Country',
-    'Blues',
-    'Metal',
-    'Orchestra'
+  const [progress, setProgress] = useState(0)
+  const genresOptions = [
+    { value: 'pop', label: 'pop' },
+    { value: 'rock', label: 'rock' },
+    { value: 'hiphop', label: 'hiphop' },
+    { value: 'jazz', label: 'jazz' },
+    { value: 'classical', label: 'classical' },
+    { value: 'country', label: 'country' },
+    { value: 'blues', label: 'blues' },
+    { value: 'metal', label: 'metal' },
+    { value: 'orchestra', label: 'orchestra' }
   ]
-  const noOfRecommendationsOptions = [5, 10, 20, 30, 40]
   const [currentTrack, setCurrentTrack] = useState({
     album: {
       images: [
@@ -74,9 +71,8 @@ function MainPage() {
   let iid: string | number | NodeJS.Timer | undefined
 
   useEffect(() => {
-    console.log('accessToken-', accessToken)
     if (accessToken) {
-      fetch(`http://127.0.0.1:5000/get-playlist`, {
+      fetch(`${SERVER_URL}/get-playlist`, {
         method: 'POST',
         body: JSON.stringify({
           playlist_id: TOP_SONGS_GLOBAL_PLAYLIST_ID,
@@ -99,7 +95,7 @@ function MainPage() {
     setSearchTerm(value)
     console.log('searchTerm-', searchTerm)
 
-    const url = 'http://127.0.0.1:5000/search-track'
+    const url = `${SERVER_URL}/search-track`
 
     if (value.length > 3) {
       fetch(`${url}?name=${value}&search_type=track&access_token=${accessToken}`, {
@@ -118,48 +114,11 @@ function MainPage() {
     }
   }
 
-  function handlePlaylistSearchChange({ target: { value = '' } }) {
-    setPlaylistSearchTerm(value)
-    console.log('searchTerm-', value)
-
-    const url = 'http://127.0.0.1:5000/get-playlist'
-
-    if (value.length > 3) {
-      fetch(url, {
-        method: 'POST',
-        body: JSON.stringify({
-          playlist_id: value,
-          playlist_limit: 10,
-          access_token: accessToken
-        })
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log('playlist link data-', data)
-          const playlistData = data.items.map((item: any) => {
-            const playlistItem = {
-              ...item.track,
-              uri: item.uri
-            }
-
-            return playlistItem
-          })
-          setPlayistLinkResults(playlistData)
-        })
-        .catch((error) => {
-          console.log('api error-', error)
-          setPlayistLinkResults([])
-        })
-    }
-  }
-
-  const handleGenreSelectOption = (option: string) => {
-    console.log('option-', option)
-    setSelectedGenre(option)
-  }
-
-  const handleNoOfRecommendationsOption = (option: number) => {
-    setNoOfRecommendations(option)
+  const handleGenreSelectOption = (options: any) => {
+    console.log('option-', options)
+    // edit array to only store values
+    const selectedOptions = options.map((option: any) => option.value)
+    setSelectedGenre(selectedOptions)
   }
 
   const handleAddToPlaylist = (item: playlistItem) => {
@@ -182,23 +141,11 @@ function MainPage() {
     return hash
   }
 
-  function addToPlaylist() {
-    setPlaylist([...playlistLinkResults])
-    setPlaylistSearchTerm('')
-    setPlayistLinkResults([])
-  }
-
-  // useEffect(() => {
-  //   // const iid = setInterval(() => {
-  //   //   pollData(uuid)
-  //   // }, 1000)
-  //   const iid = setInterval(pollData(uuid), 5000)
-  //   setIntervalId(iid)
-  // }, [uuid])
-
   const pollData = (uuid: string) => {
-    const url = 'http://127.0.0.1:5000/poll-data'
+    const url = `${SERVER_URL}/poll-data`
     console.log('uuid-', uuid)
+    setProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + 2.8))
+    console.log('progress-', progress)
     fetch(`${url}?uuid=${uuid}&access_token=${accessToken}`, {
       method: 'GET',
       headers: {
@@ -220,15 +167,14 @@ function MainPage() {
   }
 
   function sendData() {
-    const url = 'http://127.0.0.1:5000/fetch-track-details'
+    const url = `${SERVER_URL}/fetch-track-details`
     const uuid = findHash(playlist)
-    // setUuid(uuid)
     const data = {
       playlist: playlist,
       uid: uuid,
       access_token: accessToken,
-      genre: selectedGenre,
-      no_of_recommendations: noOfRecommendations
+      genres: selectedGenre,
+      no_of_recommendations: 5
     }
     console.log('send data-', data)
     setLoading(true)
@@ -237,19 +183,20 @@ function MainPage() {
       body: JSON.stringify(data)
     })
       .then((response) => response.json())
-      // .then((data: any) => {
-
-      // })
+      .then((data) => {
+        if (data.status === 'success') {
+          iid = setInterval(() => {
+            pollData(uuid)
+          }, 5000)
+          setLoading(true)
+        } else {
+          setLoading(false)
+        }
+      })
       .catch((error) => {
         console.log('api error-', error)
         setLoading(false)
       })
-
-    iid = setInterval(() => {
-      pollData(uuid)
-    }, 5000)
-    // const iid = setInterval(pollData(uuid), 5000)
-    // setIntervalId(iid)
   }
 
   if (!accessToken || isLoading) {
@@ -258,179 +205,109 @@ function MainPage() {
 
   return (
     <div>
+      <nav
+        className="navbar navbar-dark bg-light p-3"
+        style={{ backgroundImage: 'linear-gradient(to bottom, rgb(57 67 82), #000)' }}>
+        <span className="navbar-brand mb-0 h1">
+          <img
+            src={'./SoundScape.png'}
+            width="164"
+            height="42"
+            className="d-inline-block align-top"
+            alt=""
+          />
+        </span>
+      </nav>
       <Container className="main bg-black">
         <Row>
-          <Col className="Search d-flex p-2">
+          <Col className="Search d-flex align-items-center" style={{ flexDirection: 'column' }}>
             <Row>
-              <Tabs defaultActiveKey="songs" id="uncontrolled-tab-example" className="mb-3 bg-dark">
-                <Tab eventKey="songs" title="Search songs">
-                  <div className="row">
-                    <div className="col-lg-10">
-                      <Form.Control
-                        type="text"
-                        placeholder="Search Songs"
-                        value={searchTerm}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div className="col-lg-2">
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        className="pr-1"
-                        onClick={() => setSearchTerm('')}>
-                        Clear
-                      </Button>
-                    </div>
+              <Col className="h2 text-white">Add Songs</Col>
+            </Row>
+            <Row style={{ padding: '1.5rem' }}>
+              <Col>
+                <div className="row">
+                  <div className="col-lg-10">
+                    <Form.Control
+                      type="text"
+                      placeholder="Search Songs"
+                      value={searchTerm}
+                      onChange={handleChange}
+                    />
                   </div>
-
-                  {searchTerm && (
-                    <div className="row">
-                      <div className="col-10" style={{ zIndex: 2 }}>
-                        {searchResults && (
-                          <ItemList onChildData={handleAddToPlaylist} items={searchResults} />
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {!searchTerm && (
-                    <>
-                      {playlist.length > 0 && (
-                        <>
-                          <div
-                            className="flex-grow-1 my-2 bg-black text-white"
-                            style={{ overflowY: 'auto' }}>
-                            Playlist
-                            <ListGroup>
-                              {playlist.map((playlistItem, index) => (
-                                <ListGroup.Item
-                                  key={playlistItem.id}
-                                  className="d-flex p-2 bg-dark text-white mb-2">
-                                  <div className="col-2">
-                                    <img
-                                      width="50px"
-                                      height="50px"
-                                      src={playlistItem.album.images[0].url}
-                                      alt="Song cover"
-                                    />
-                                  </div>
-                                  <div className="col-8" style={{ textAlign: 'left' }}>
-                                    <div className="row">{playlistItem.name}</div>
-                                    <div className="row">
-                                      Artists:{' '}
-                                      {playlistItem.artists.map((artist) => artist.name).join(', ')}
-                                    </div>
-                                  </div>
-                                  <div className="col-2">
-                                    <Button
-                                      variant="secondary"
-                                      className="rounded-circle"
-                                      size="lg"
-                                      onClick={() => handleRemoveFromPlaylist(index)}>
-                                      -
-                                    </Button>
-                                  </div>
-                                </ListGroup.Item>
-                              ))}
-                            </ListGroup>
-                          </div>
-                          <Row>
-                            <Col className="text-start">
-                              <Dropdown
-                                title="Genre"
-                                items={genres}
-                                handleSelectOption={handleGenreSelectOption}
-                              />
-                            </Col>
-                            <Col className="text-start">
-                              <Dropdown
-                                title="No. of Recommendations"
-                                items={noOfRecommendationsOptions}
-                                handleSelectOption={handleNoOfRecommendationsOption}
-                              />
-                            </Col>
-                            <Col className="text-end">
-                              <Button variant="secondary" size="lg" onClick={sendData}>
-                                Recommend
-                              </Button>
-                            </Col>
-                          </Row>
-                        </>
-                      )}
-                    </>
-                  )}
-                </Tab>
-                <Tab eventKey="link" title="Playlist Link">
-                  <div className="row">
-                    <div className="col-lg-10">
-                      <Form.Control
-                        type="text"
-                        placeholder="Search playlist link"
-                        value={playlistSearchTerm}
-                        onChange={handlePlaylistSearchChange}
-                      />
-                    </div>
-
-                    <div className="col-lg-2">
-                      <Button variant="primary" size="lg" className="pr-1" onClick={addToPlaylist}>
-                        Add
-                      </Button>
-                    </div>
+                  <div className="col-lg-2">
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      className="pr-1"
+                      onClick={() => setSearchTerm('')}>
+                      Clear
+                    </Button>
                   </div>
-
-                  <div style={{ zIndex: 2 }}>
-                    {playlistLinkResults && (
-                      <ItemList onChildData={handleAddToPlaylist} items={playlistLinkResults} />
+                </div>
+              </Col>
+              {searchTerm && (
+                <div className="row">
+                  <div className="col-10" style={{ zIndex: 2 }}>
+                    {searchResults && (
+                      <ItemList onChildData={handleAddToPlaylist} items={searchResults} />
                     )}
                   </div>
-
-                  {!playlistSearchTerm && (
+                </div>
+              )}
+              {!searchTerm && (
+                <>
+                  {playlist.length > 0 && (
                     <>
-                      {playlist.length > 0 && (
-                        <div className="flex-grow-1 my-2" style={{ overflowY: 'auto' }}>
-                          Playlist
-                          <ListGroup>
-                            {playlist.map((playlistItem, index) => (
-                              <ListGroup.Item key={playlistItem.id} className="d-flex p-2">
-                                <div className="col-2">
-                                  <img
-                                    width="50px"
-                                    height="50px"
-                                    src={playlistItem.album.images[0].url}
-                                    alt="Song cover"
-                                  />
-                                </div>
-                                <div className="col-8" style={{ textAlign: 'left' }}>
-                                  <div className="row">{playlistItem.name}</div>
-                                  <div className="row">
-                                    Artists:{' '}
-                                    {playlistItem.artists.map((artist) => artist.name).join(', ')}
-                                  </div>
-                                </div>
-                                <div className="col-2">
-                                  <Button
-                                    variant="secondary"
-                                    className="rounded-circle"
-                                    size="lg"
-                                    onClick={() => handleRemoveFromPlaylist(index)}>
-                                    -
-                                  </Button>
-                                </div>
-                              </ListGroup.Item>
-                            ))}
-                          </ListGroup>
-                          <Button onClick={sendData}>Submit</Button>
-                        </div>
-                      )}
+                      <div
+                        className="flex-grow-1 my-2 bg-black text-white"
+                        style={{ overflowY: 'auto' }}>
+                        <ListGroup>
+                          {playlist.map((playlistItem, index) => (
+                            <SongCard
+                              key={index}
+                              song={playlistItem}
+                              setCurrentTrack={setCurrentTrack}
+                              buttonType="remove"
+                              handleRemoveFromPlaylist={handleRemoveFromPlaylist}
+                              index={index}
+                            />
+                          ))}
+                        </ListGroup>
+                      </div>
+                      <Row className="d-flex justify-content-center">
+                        <Col className="text-start col-lg-12 p-3">
+                          <Select
+                            isMulti
+                            placeholder="Select Genres"
+                            options={genresOptions}
+                            onChange={handleGenreSelectOption}
+                            autoFocus={true}
+                          />
+                        </Col>
+                        <Col className="text-end col-lg-6 p-3">
+                          <Button
+                            variant="secondary"
+                            size="lg"
+                            onClick={sendData}
+                            style={{ width: '100%' }}>
+                            Recommend
+                          </Button>
+                        </Col>
+                      </Row>
                     </>
                   )}
-                </Tab>
-              </Tabs>
+                </>
+              )}
             </Row>
           </Col>
-          <Col>
-            {!loading && (
+
+          {!loading && (
+            <Col
+              className="d-flex justify-content-center"
+              style={{
+                backgroundImage: 'linear-gradient(rgb(0, 0, 0) 30%, rgb(57 67 82))'
+              }}>
               <Col className="Recommendations">
                 <RecommendationsWrapper
                   access_token={accessToken}
@@ -441,31 +318,20 @@ function MainPage() {
                   setTitle={setTitle}
                 />
               </Col>
-            )}
-            <Col>
-              {/* <ListGroup>
-                {!loading &&
-                  recommendations.length > 0 &&
-                  recommendations.map((recommendation: any) => {
-                    return (
-                      <ListGroup.Item
-                        key={recommendation[0]}
-                        variant="dark"
-                        className="d-flex mb-2 bg-dark">
-                        <div className="text-white">
-                          {recommendation[0]}- {recommendation[1]}
-                        </div>
-                      </ListGroup.Item>
-                    )
-                  })}
-              </ListGroup> */}
-              {loading && (
-                <Col>
-                  <ProgressBar now={60} label={`${60}%`} />
-                </Col>
-              )}
             </Col>
-          </Col>
+          )}
+          {loading && (
+            <Col
+              className="d-flex justify-content-center align-items-center"
+              style={{
+                backgroundImage: 'linear-gradient(rgb(0, 0, 0) 30%, rgb(57 67 82))'
+              }}>
+              <div>
+                <WaveSpinner loading={loading} size={35} />
+                <span className="text-white">Computing...</span>
+              </div>
+            </Col>
+          )}
         </Row>
       </Container>
       <SpotifyPlayerWrapper token={accessToken} track={currentTrack} />
