@@ -2,12 +2,6 @@ import { useState, useEffect } from 'react'
 import { Row, Card, Button } from 'react-bootstrap'
 import SongCard from '../SongCard'
 
-// create a Spotify like box component in react which contains the following items
-// - a photo of song
-// - play button
-// - song name
-// - artist name
-
 const TOP_SONGS_GLOBAL_PLAYLIST_ID = '37i9dQZEVXbNG2KDcFcKOF'
 
 interface RecommendationsWrapperProps {
@@ -28,7 +22,7 @@ function RecommendationsWrapper({
   setTitle
 }: RecommendationsWrapperProps) {
   return (
-    <Row>
+    <Row className="row d-flex justify-content-center" style={{ padding: '0rem 1.5rem' }}>
       <Row>
         <h2>
           <b className="text-white">{title}</b>
@@ -36,7 +30,14 @@ function RecommendationsWrapper({
       </Row>
       <Row>
         {recommendations.map(({ track }: any) => (
-          <SongCard key={track.id} song={track} setCurrentTrack={setCurrentTrack} />
+          <SongCard
+            key={track.id}
+            song={track}
+            setCurrentTrack={setCurrentTrack}
+            index={track.id}
+            buttonType="play"
+            handleRemoveFromPlaylist={() => console.log('remove from playlist')}
+          />
         ))}
       </Row>
     </Row>

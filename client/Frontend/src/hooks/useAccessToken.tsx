@@ -7,6 +7,8 @@ interface TokenData {
   refresh_token: string
 }
 
+const SERVER_URL = 'http://127.0.0.1:5000'
+
 function useAccessToken() {
   const [accessToken, setAccessToken] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -21,7 +23,7 @@ function useAccessToken() {
       const expiresIn = sessionInfo.expires_in
       const refresh_token = sessionInfo.refresh_token
       if (now - creationTime > expiresIn * 1000) {
-        fetch('http://127.0.0.1:5000/refresh', {
+        fetch(`${SERVER_URL}/refresh`, {
           method: 'POST',
           body: JSON.stringify({ refresh_token: refresh_token })
         })

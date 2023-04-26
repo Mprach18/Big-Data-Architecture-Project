@@ -15,6 +15,9 @@ from ast import literal_eval
 import os
 from google.cloud import storage
 
+HOSTING_ADDRESS = 'http://127.0.0.1:5000'
+FRONTEND_ADDRESS = 'http://localhost:3000'
+
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 app.secret_key = SECRET_KEY
@@ -27,7 +30,7 @@ SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, API_VERSION)
 SPOTIFY_AUTH_URL = 'https://accounts.spotify.com/authorize'
 SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
-REDIRECT_URI = 'http://127.0.0.1:5000/callback'
+REDIRECT_URI = HOSTING_ADDRESS + '/callback'
 SCOPE = 'playlist-modify-private,playlist-modify-public,user-top-read,streaming,user-read-email,user-read-private,user-read-playback-state,user-modify-playback-state'
 SHOW_DIALOG = True
 
@@ -76,7 +79,7 @@ def callback():
     response['date'] = datetime.datetime.now()
 
     # Save access token to session
-    return redirect('http://localhost:3000/?' + requests.compat.urlencode(response))
+    return redirect(FRONTEND_ADDRESS + '/?' + requests.compat.urlencode(response))
 
 # Make a request to the Spotify API to refresh the access token
 # make it a post request
