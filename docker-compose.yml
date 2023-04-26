@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  react:
+    build: ./client
+    ports:
+      - "3000:3000"
+
+  flask:
+    build: ./
+    ports:
+      - "5000:5000"
+
+  # nginx:
+  #   image: nginx
+  #   ports:
+  #     - "8000:80"
+  #   #volumes:
+  #   #   - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - react
+  #     - flask
